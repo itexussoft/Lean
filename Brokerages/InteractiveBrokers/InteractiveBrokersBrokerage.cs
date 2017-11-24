@@ -2191,6 +2191,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
         }
 
+        public Symbol GetSubscribedSymbol(int tickerId)
+        {
+            //Don't lock this!!!
+            return _subscribedTickets[tickerId];
+        }
+
         /// <summary>
         /// Adds the specified symbols to the subscription
         /// </summary>
