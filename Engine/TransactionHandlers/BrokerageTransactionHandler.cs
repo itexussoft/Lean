@@ -943,7 +943,7 @@ namespace QuantConnect.Lean.Engine.TransactionHandlers
             if (fill.Status != OrderStatus.None) //order.Status != OrderStatus.Submitted
             {
                 //Create new order event:
-                _resultHandler.OrderEvent(fill);
+                //_resultHandler.OrderEvent(fill);
                 try
                 {
                     //Trigger our order event handler
