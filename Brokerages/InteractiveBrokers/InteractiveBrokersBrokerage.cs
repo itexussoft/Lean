@@ -48,7 +48,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         // next valid order id for this client
         private int _nextValidId;
         // next valid client id for the gateway/tws
-        private static int _nextClientId;
+
+        #if DEBUG
+            private static int _nextClientId = 5;
+        #else
+            private static int _nextClientId;
+        #endif
+        
         // next valid request id for queries
         private int _nextRequestId;
         private int _nextTickerId;
@@ -2787,11 +2793,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         public void CheckIbGateway()
         {
             Log.Trace("InteractiveBrokersBrokerage.CheckIbGateway(): start");
-            if (!InteractiveBrokersGatewayRunner.IsRunning())
-            {
-                Log.Trace("InteractiveBrokersBrokerage.CheckIbGateway(): IB Gateway not running. Restarting...");
-                _resetEventRestartGateway.Set();
-            }
+            //if (!InteractiveBrokersGatewayRunner.IsRunning())
+            //{
+            //    Log.Trace("InteractiveBrokersBrokerage.CheckIbGateway(): IB Gateway not running. Restarting...");
+            //    _resetEventRestartGateway.Set();
+            //}
             Log.Trace("InteractiveBrokersBrokerage.CheckIbGateway(): end");
         }
 
