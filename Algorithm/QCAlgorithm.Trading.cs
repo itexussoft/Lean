@@ -201,16 +201,18 @@ namespace QuantConnect.Algorithm
 
             // check the exchange is open before sending a market order, if it's not open
             // then convert it into a market on open order
-            if (!security.Exchange.ExchangeOpen)
-            {
-                var mooTicket = MarketOnOpenOrder(security.Symbol, quantity, tag);
-                var anyNonDailySubscriptions = security.Subscriptions.Any(x => x.Resolution != Resolution.Daily);
-                if (mooTicket.SubmitRequest.Response.IsSuccess && !anyNonDailySubscriptions)
-                {
-                    Debug("Converted OrderID: " + mooTicket.OrderId + " into a MarketOnOpen order.");
-                }
-                return mooTicket;
-            }
+
+            //todo:think about it
+            //if (!security.Exchange.ExchangeOpen)
+            //{
+            //    var mooTicket = MarketOnOpenOrder(security.Symbol, quantity, tag);
+            //    var anyNonDailySubscriptions = security.Subscriptions.Any(x => x.Resolution != Resolution.Daily);
+            //    if (mooTicket.SubmitRequest.Response.IsSuccess && !anyNonDailySubscriptions)
+            //    {
+            //        Debug("Converted OrderID: " + mooTicket.OrderId + " into a MarketOnOpen order.");
+            //    }
+            //    return mooTicket;
+            //}
 
             var request = CreateSubmitOrderRequest(OrderType.Market, security, quantity, tag, DefaultOrderProperties?.Clone());
 
