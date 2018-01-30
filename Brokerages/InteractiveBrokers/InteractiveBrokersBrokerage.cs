@@ -429,6 +429,51 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return holdings;
         }
 
+        public Dictionary<string, string> GetAccountSummary()
+        {
+            return this.GetAccountSummary(AccountSummaryTags.GetAllTags());
+        }
+
+        public Dictionary<string, string> GetAccountSummary(string tag)
+        {
+            var requestId = GetNextRequestId();
+            var manualResetEvent = new ManualResetEvent(false);
+            var result = new Dictionary<string, string>();
+            
+            EventHandler<IB.AccountSummaryEventArgs> accountSummary = (sender, args) =>
+            {
+                if (args.RequestId == requestId)
+                {
+                    result.Add(args.Tag, args.Value);
+                }
+            };
+
+            // define our event handlers
+            EventHandler<IB.RequestEndEventArgs> accountSummaryEnd = (sender, args) =>
+            {
+                if (args.RequestId == requestId)
+                {
+                    _client.ClientSocket.cancelAccountSummary(requestId);
+                    manualResetEvent.Set();
+                }
+            };
+            
+            _client.AccountSummary += accountSummary;
+            _client.AccountSummaryEnd += accountSummaryEnd;
+
+            _client.ClientSocket.reqAccountSummary(requestId, "All", tag);
+
+            if (!manualResetEvent.WaitOne(5000))
+            {
+                throw new TimeoutException("InteractiveBrokersBrokerage.GetAccountSummary(): Operation took longer than 5 seconds.");
+            }
+
+            _client.AccountSummary -= accountSummary;
+            _client.AccountSummaryEnd -= accountSummaryEnd;
+
+            return result;
+        }
+
         /// <summary>
         /// Gets the current cash balance for each currency held in the brokerage account
         /// </summary>
