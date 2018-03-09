@@ -519,19 +519,19 @@ namespace QuantConnect.Algorithm
             foreach (var request in reqs)
             {
                 // prevent future requests
-                if (request.EndTimeUtc > UtcTime)
-                {
-                    request.EndTimeUtc = UtcTime;
-                    if (request.StartTimeUtc > request.EndTimeUtc)
-                    {
-                        request.StartTimeUtc = request.EndTimeUtc;
-                    }
-                    if (!sentMessage)
-                    {
-                        sentMessage = true;
-                        Debug("Request for future history modified to end now.");
-                    }
-                }
+                //if (request.EndTimeUtc > UtcTime)
+                //{
+                //    request.EndTimeUtc = UtcTime;
+                //    if (request.StartTimeUtc > request.EndTimeUtc)
+                //    {
+                //        request.StartTimeUtc = request.EndTimeUtc;
+                //    }
+                //    if (!sentMessage)
+                //    {
+                //        sentMessage = true;
+                //        Debug("Request for future history modified to end now.");
+                //    }
+                //}
             }
 
             // filter out future data to prevent look ahead bias
