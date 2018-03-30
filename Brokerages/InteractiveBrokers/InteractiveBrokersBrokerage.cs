@@ -80,11 +80,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private readonly ManualResetEvent _waitForNextValidId = new ManualResetEvent(false);
         private readonly ManualResetEvent _accountHoldingsResetEvent = new ManualResetEvent(false);
 
-        // tracks executions before commission reports, map: execId -> execution
-        private readonly ConcurrentDictionary<string, Execution> _orderExecutions = new ConcurrentDictionary<string, Execution>();
-        // tracks commission reports before executions, map: execId -> commission report
-        private readonly ConcurrentDictionary<string, CommissionReport> _commissionReports = new ConcurrentDictionary<string, CommissionReport>();
-
         // holds account properties, cash balances and holdings for the account
         private readonly InteractiveBrokersAccountData _accountData = new InteractiveBrokersAccountData();
 
@@ -212,7 +207,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             _client.OpenOrderEnd += HandleOpenOrderEnd;
             _client.UpdateAccountValue += HandleUpdateAccountValue;
             _client.ExecutionDetails += HandleExecutionDetails;
-            _client.CommissionReport += HandleCommissionReport;
             _client.Error += HandleError;
             _client.TickPrice += HandleTickPrice;
             _client.TickSize += HandleTickSize;
@@ -1398,6 +1392,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             {
                 Log.Trace("InteractiveBrokersBrokerage.HandleOrderStatusUpdates(): " + update);
 
+                var status = ConvertOrderStatus(update.Status);
+                if (status != OrderStatus.Invalid)
+                {
+                    return;
+                }
+
                 if (!IsConnected)
                 {
                     if (_client != null)
@@ -1417,15 +1417,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     Log.Error("InteractiveBrokersBrokerage.HandleOrderStatusUpdates(): Unable to locate order with BrokerageID " + update.OrderId);
                     return;
                 }
-
-                var status = ConvertOrderStatus(update.Status);
-
-                if (status == OrderStatus.Filled || status == OrderStatus.PartiallyFilled)
-                {
-                    // fill events will be only processed in HandleExecutionDetails and HandleCommissionReports
-                    return;
-                }
-
+                
                 // IB likes to duplicate/triplicate some events, so we fire non-fill events only if status changed
                 if (status != order.Status)
                 {
@@ -1510,68 +1502,15 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 // so we ignore events received after the order is completely filled or
                 // executions for allocations which are already included in the master execution.
 
-                CommissionReport commissionReport;
-                if (_commissionReports.TryGetValue(executionDetails.Execution.ExecId, out commissionReport))
+                if (CanEmitFill(order, executionDetails.Execution))
                 {
-                    if (CanEmitFill(order, executionDetails.Execution))
-                    {
-                        // we have both execution and commission report, emit the fill
-                        EmitOrderFill(order, executionDetails.Execution, commissionReport);
-                    }
-
-                    _commissionReports.TryRemove(commissionReport.ExecId, out commissionReport);
-                }
-                else
-                {
-                    // save execution in dictionary and wait for commission report
-                    _orderExecutions[executionDetails.Execution.ExecId] = executionDetails.Execution;
+                    // we have both execution and commission report, emit the fill
+                    EmitOrderFill(order, executionDetails.Execution);
                 }
             }
             catch (Exception err)
             {
                 Log.Error("InteractiveBrokersBrokerage.HandleExecutionDetails(): " + err);
-            }
-        }
-
-        /// <summary>
-        /// Handle commission report events from IB
-        /// </summary>
-        /// <remarks>
-        /// This method matches commission reports with previously saved executions and fires the OrderEvents.
-        /// </remarks>
-        private void HandleCommissionReport(object sender, IB.CommissionReportEventArgs e)
-        {
-            try
-            {
-                Log.Trace("InteractiveBrokersBrokerage.HandleCommissionReport(): " + e);
-
-                Execution execution;
-                if (!_orderExecutions.TryGetValue(e.CommissionReport.ExecId, out execution))
-                {
-                    // save commission in dictionary and wait for execution event
-                    _commissionReports[e.CommissionReport.ExecId] = e.CommissionReport;
-                    return;
-                }
-
-                var order = _orderProvider.GetOrderByBrokerageId(execution.OrderId);
-                if (order == null)
-                {
-                    Log.Error("InteractiveBrokersBrokerage.HandleExecutionDetails(): Unable to locate order with BrokerageID " + execution.OrderId);
-                    return;
-                }
-
-                if (CanEmitFill(order, execution))
-                {
-                    // we have both execution and commission report, emit the fill
-                    EmitOrderFill(order, execution, e.CommissionReport);
-                }
-
-                // always remove previous execution
-                _orderExecutions.TryRemove(e.CommissionReport.ExecId, out execution);
-            }
-            catch (Exception err)
-            {
-                Log.Error("InteractiveBrokersBrokerage.HandleCommissionReport(): " + err);
             }
         }
 
@@ -1602,13 +1541,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Emits an order fill (or partial fill) including the actual IB commission paid
         /// </summary>
-        private void EmitOrderFill(Order order, Execution execution, CommissionReport commissionReport)
+        private void EmitOrderFill(Order order, Execution execution)
         {
             var currentQuantityFilled = Convert.ToInt32(execution.Shares);
             var totalQuantityFilled = Convert.ToInt32(execution.CumQty);
             var remainingQuantity = Convert.ToInt32(order.AbsoluteQuantity - totalQuantityFilled);
             var price = Convert.ToDecimal(execution.Price);
-            var orderFee = Convert.ToDecimal(commissionReport.Commission);
 
             // set order status based on remaining quantity
             var status = remainingQuantity > 0 ? OrderStatus.PartiallyFilled : OrderStatus.Filled;
@@ -1616,7 +1554,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             // mark sells as negative quantities
             var fillQuantity = order.Direction == OrderDirection.Buy ? currentQuantityFilled : -currentQuantityFilled;
             order.PriceCurrency = _securityProvider.GetSecurity(order.Symbol).SymbolProperties.QuoteCurrency;
-            var orderEvent = new OrderEvent(order, DateTime.UtcNow, orderFee, "Interactive Brokers Order Fill Event")
+            var orderEvent = new OrderEvent(order, DateTime.UtcNow, default(decimal), "Interactive Brokers Order Fill Event")
             {
                 Status = status,
                 FillPrice = price,
