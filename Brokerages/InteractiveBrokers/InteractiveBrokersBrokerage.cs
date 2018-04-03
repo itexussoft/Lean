@@ -89,6 +89,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
         private readonly InteractiveBrokersSymbolMapper _symbolMapper = new InteractiveBrokersSymbolMapper();
 
+        private readonly BusyBlockingCollection<IB.ExecutionDetailsEventArgs> _executionDetailsQueue = new BusyBlockingCollection<IB.ExecutionDetailsEventArgs>();
+
         // Prioritized list of exchanges used to find right futures contract
         private readonly Dictionary<string, string> _futuresExchanges = new Dictionary< string, string>
         {
@@ -1463,6 +1465,19 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             Log.Trace("InteractiveBrokersBrokerage.HandleOpenOrderEnd()");
         }
 
+        public void ProcessExecutionDetailsQueue()
+        {
+            foreach (var executionDetailsEventArgs in _executionDetailsQueue.GetConsumingEnumerable())
+            {
+                this.ProcessExecutionDetails(executionDetailsEventArgs);
+            }
+        }
+
+        private void HandleExecutionDetails(object sender, IB.ExecutionDetailsEventArgs executionDetails)
+        {
+            _executionDetailsQueue.Add(executionDetails);
+        }
+
         /// <summary>
         /// Handle execution events from IB
         /// </summary>
@@ -1470,7 +1485,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// This needs to be handled because if a market order is executed immediately, there will be no OrderStatus event
         /// https://interactivebrokers.github.io/tws-api/order_submission.html#order_status
         /// </remarks>
-        private void HandleExecutionDetails(object sender, IB.ExecutionDetailsEventArgs executionDetails)
+        private void ProcessExecutionDetails(IB.ExecutionDetailsEventArgs executionDetails)
         {
             try
             {
