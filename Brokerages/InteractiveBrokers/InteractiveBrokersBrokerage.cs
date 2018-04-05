@@ -205,13 +205,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             // set up event handlers
             _client.UpdatePortfolio += HandlePortfolioUpdates;
             _client.OrderStatus += HandleOrderStatusUpdates;
-            _client.OpenOrder += HandleOpenOrder;
-            _client.OpenOrderEnd += HandleOpenOrderEnd;
+            //_client.OpenOrder += HandleOpenOrder;
+            //_client.OpenOrderEnd += HandleOpenOrderEnd;
             _client.UpdateAccountValue += HandleUpdateAccountValue;
             _client.ExecutionDetails += HandleExecutionDetails;
             _client.Error += HandleError;
-            _client.TickPrice += HandleTickPrice;
-            _client.TickSize += HandleTickSize;
+            //_client.TickPrice += HandleTickPrice;
+            //_client.TickSize += HandleTickSize;
             _client.CurrentTimeUtc += HandleBrokerTime;
 
             // we need to wait until we receive the next valid id from the server
