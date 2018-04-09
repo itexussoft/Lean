@@ -1467,10 +1467,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
         public void ProcessExecutionDetailsQueue()
         {
-            foreach (var executionDetailsEventArgs in _executionDetailsQueue.GetConsumingEnumerable())
-            {
-                this.ProcessExecutionDetails(executionDetailsEventArgs);
-            }
+            Parallel.ForEach(_executionDetailsQueue.GetConsumingEnumerable(),
+                new ParallelOptions {MaxDegreeOfParallelism = 15}, this.ProcessExecutionDetails);
         }
 
         private void HandleExecutionDetails(object sender, IB.ExecutionDetailsEventArgs executionDetails)
