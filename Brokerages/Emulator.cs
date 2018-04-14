@@ -52,7 +52,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 #if DEBUG
         private static int _nextClientId = 5;
 #else
-            private static int _nextClientId;
+        private static int _nextClientId;
 #endif
 
         // next valid request id for queries
@@ -69,6 +69,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private readonly ISecurityProvider _securityProvider;
         private readonly IB.InteractiveBrokersClient _client;
         private readonly string _agentDescription;
+
+        private List<Contract> contracts { get; set; }
 
         private Thread _messageProcessingThread;
         private readonly AutoResetEvent _resetEventRestartGateway = new AutoResetEvent(false);
@@ -116,6 +118,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         // so we track subscription times to ensure symbols are not unsubscribed before a minimum time span has elapsed
         private readonly Dictionary<int, DateTime> _subscriptionTimes = new Dictionary<int, DateTime>();
         private readonly TimeSpan _minimumTimespanBeforeUnsubscribe = TimeSpan.FromMilliseconds(500);
+
+        public List<Contract> Contracts
+        {
+            get
+            {
+                return this.contracts;
+            }
+        }
 
         /// <summary>
         /// Returns true if we're currently connected to the broker
@@ -268,6 +278,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         public IB.InteractiveBrokersClient Client
         {
             get { return _client; }
+        }
+
+        public ConcurrentDictionary<Symbol, int> SubscribedSymbols
+        {
+            get
+            {
+                return this._subscribedSymbols;
+            }
         }
 
         /// <summary>
@@ -827,6 +845,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
 
             var contract = CreateContract(order.Symbol, exchange);
+            this.contracts.Add(contract);
 
             int ibOrderId;
             if (needsNewId)
@@ -2118,6 +2137,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             while (_nextValidId == 0) { Thread.Yield(); }
 
             return Interlocked.Increment(ref _nextValidId);
+        }
+
+        public int NextRequestId()
+        {
+            return this.GetNextRequestId();
         }
 
         private int GetNextRequestId()
