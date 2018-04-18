@@ -47,39 +47,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     {
         private List<Contract> contracts { get; set; }
 
-        // holds account properties, cash balances and holdings for the account
-        private readonly InteractiveBrokersAccountData _accountData = new InteractiveBrokersAccountData();
-
-        private readonly ConcurrentDictionary<string, ContractDetails> _contractDetails = new ConcurrentDictionary<string, ContractDetails>();
-
-        private readonly InteractiveBrokersSymbolMapper _symbolMapper = new InteractiveBrokersSymbolMapper();
-
-        private readonly BusyBlockingCollection<IB.ExecutionDetailsEventArgs> _executionDetailsQueue = new BusyBlockingCollection<IB.ExecutionDetailsEventArgs>();
-
-        // Prioritized list of exchanges used to find right futures contract
-        private readonly Dictionary<string, string> _futuresExchanges = new Dictionary<string, string>
-        {
-            { Market.Globex, "GLOBEX" },
-            { Market.NYMEX, "NYMEX" },
-            { Market.CBOT, "ECBOT" },
-            { Market.ICE, "NYBOT" },
-            { Market.CBOE, "CFE" }
-        };
-
-        // exchange time zones by symbol
-        private readonly Dictionary<Symbol, DateTimeZone> _symbolExchangeTimeZones = new Dictionary<Symbol, DateTimeZone>();
-
-        // IB requests made through the IB-API must be limited to a maximum of 50 messages/second
-        private readonly RateGate _messagingRateLimiter = new RateGate(50, TimeSpan.FromSeconds(1));
-
-        // additional IB request information, will be matched with errors in the handler, for better error reporting
-        private readonly ConcurrentDictionary<int, string> _requestInformation = new ConcurrentDictionary<int, string>();
-
-        // when unsubscribing symbols immediately after subscribing IB returns an error (Can't find EId with tickerId:nnn),
-        // so we track subscription times to ensure symbols are not unsubscribed before a minimum time span has elapsed
-        private readonly Dictionary<int, DateTime> _subscriptionTimes = new Dictionary<int, DateTime>();
-        private readonly TimeSpan _minimumTimespanBeforeUnsubscribe = TimeSpan.FromMilliseconds(500);
-
         public List<Contract> Contracts
         {
             get

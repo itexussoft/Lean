@@ -110,7 +110,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private bool _previouslyInResetTime;
 
         // additional IB request information, will be matched with errors in the handler, for better error reporting
-        private readonly ConcurrentDictionary<int, string> _requestInformation = new ConcurrentDictionary<int, string>();
+        protected readonly ConcurrentDictionary<int, string> _requestInformation = new ConcurrentDictionary<int, string>();
 
         // when unsubscribing symbols immediately after subscribing IB returns an error (Can't find EId with tickerId:nnn),
         // so we track subscription times to ensure symbols are not unsubscribed before a minimum time span has elapsed
