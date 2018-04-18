@@ -175,6 +175,7 @@
     <Compile Include="BrokerageException.cs" />
     <Compile Include="BrokerageFactory.cs" />
     <Compile Include="Emulator.cs" />
+    <Compile Include="EmulatorTimer.cs" />
     <Compile Include="Fxcm\FxcmBrokerage.cs" />
     <Compile Include="Fxcm\FxcmBrokerage.DataQueueHandler.cs" />
     <Compile Include="Fxcm\FxcmBrokerage.Messaging.cs" />
@@ -190,6 +191,12 @@
     <Compile Include="GDAX\GDAXFill.cs" />
     <Compile Include="GDAX\GDAXBrokerage.Messaging.cs" />
     <Compile Include="GDAX\OrderBook.cs" />
+    <Compile Include="IbClasses\AlgorithmHelper.cs" />
+    <Compile Include="IbClasses\MOOOrderTicket.cs" />
+    <Compile Include="IbClasses\OrderTag.cs" />
+    <Compile Include="IbClasses\PRule.cs" />
+    <Compile Include="IbClasses\ScheduledEventHandler.cs" />
+    <Compile Include="IbClasses\SymbolData.cs" />
     <Compile Include="IWebSocket.cs" />
     <Compile Include="GDAX\Messages.cs" />
     <Compile Include="WebSocketError.cs" />
@@ -553,6 +560,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\WTP\Utils.Common\Utils.Common.csproj">
+      <Project>{461637dc-2971-45e9-a093-9129994d5e01}</Project>
+      <Name>Utils.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\WTP\WTP.BLL.Infrastructure.DTO\WTP.BLL.Infrastructure.DTO.csproj">
+      <Project>{d4bd8c5f-a4a1-47f3-a329-fb0f918492a3}</Project>
+      <Name>WTP.BLL.Infrastructure.DTO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\WTP\WTP.BLL.Infrastructure\WTP.BLL.Infrastructure.csproj">
+      <Project>{a23a96da-fc2a-4f34-9b87-7c3ad0bc1c08}</Project>
+      <Name>WTP.BLL.Infrastructure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\QuantConnect.csproj">
       <Project>{2545c0b4-fabb-49c9-8dd1-9ad7ee23f86b}</Project>
       <Name>QuantConnect</Name>
