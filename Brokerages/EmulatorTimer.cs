@@ -31,7 +31,7 @@ namespace QuantConnect.Brokerages
             LastPrice = 4
         }
 
-        private static readonly TimeSpan StartTickerPrice = AlgorithmHelper.GetExecutionTime("9:20:00");
+        private static readonly TimeSpan StartTickerPrice = AlgorithmHelper.GetExecutionTime("11:34:00");
         private static readonly TimeSpan StartExecutionDetails = AlgorithmHelper.GetExecutionTime("9:30:00");
 
 

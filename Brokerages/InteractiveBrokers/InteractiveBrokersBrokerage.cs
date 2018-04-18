@@ -43,7 +43,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     /// <summary>
     /// The Interactive Brokers brokerage
     /// </summary>
-    public sealed class InteractiveBrokersBrokerage : Brokerage, IDataQueueHandler, IDataQueueUniverseProvider
+    public class InteractiveBrokersBrokerage : Brokerage, IDataQueueHandler, IDataQueueUniverseProvider
     {
         // next valid order id for this client
         private int _nextValidId;
@@ -58,17 +58,17 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         // next valid request id for queries
         private int _nextRequestId;
         private int _nextTickerId;
-        private volatile bool _disconnected1100Fired;
+        protected volatile bool _disconnected1100Fired;
 
         private readonly int _port;
-        private readonly string _account;
+        protected readonly string _account;
         private readonly string _host;
         private readonly int _clientId;
         private readonly IAlgorithm _algorithm;
         private readonly IOrderProvider _orderProvider;
-        private readonly ISecurityProvider _securityProvider;
-        private readonly IB.InteractiveBrokersClient _client;
-        private readonly string _agentDescription;
+        protected readonly ISecurityProvider _securityProvider;
+        protected readonly IB.InteractiveBrokersClient _client;
+        protected readonly string _agentDescription;
 
         private Thread _messageProcessingThread;
         private readonly AutoResetEvent _resetEventRestartGateway = new AutoResetEvent(false);
@@ -1176,7 +1176,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Handles error messages from IB
         /// </summary>
-        private void HandleError(object sender, IB.ErrorEventArgs e)
+        protected void HandleError(object sender, IB.ErrorEventArgs e)
         {
             // https://www.interactivebrokers.com/en/software/api/apiguide/tables/api_message_codes.htm
 
@@ -1364,7 +1364,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Stores all the account values
         /// </summary>
-        private void HandleUpdateAccountValue(object sender, IB.UpdateAccountValueEventArgs e)
+        protected void HandleUpdateAccountValue(object sender, IB.UpdateAccountValueEventArgs e)
         {
             try
             {
@@ -1388,7 +1388,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Handle order events from IB
         /// </summary>
-        private void HandleOrderStatusUpdates(object sender, IB.OrderStatusEventArgs update)
+        protected void HandleOrderStatusUpdates(object sender, IB.OrderStatusEventArgs update)
         {
             try
             {
@@ -1473,7 +1473,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
         }
 
-        private void HandleExecutionDetails(object sender, IB.ExecutionDetailsEventArgs executionDetails)
+        protected void HandleExecutionDetails(object sender, IB.ExecutionDetailsEventArgs executionDetails)
         {
             _executionDetailsQueue.Add(executionDetails);
         }
@@ -1587,7 +1587,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Handle portfolio changed events from IB
         /// </summary>
-        private void HandlePortfolioUpdates(object sender, IB.UpdatePortfolioEventArgs e)
+        protected void HandlePortfolioUpdates(object sender, IB.UpdatePortfolioEventArgs e)
         {
             _accountHoldingsResetEvent.Reset();
             var holding = CreateHolding(e);
@@ -1597,7 +1597,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Converts a QC order to an IB order
         /// </summary>
-        private IBApi.Order ConvertOrder(Order order, Contract contract, int ibOrderId)
+        protected IBApi.Order ConvertOrder(Order order, Contract contract, int ibOrderId)
         {
             var ibOrder = new IBApi.Order
             {
@@ -1756,7 +1756,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <param name="symbol">The symbol whose contract we need to create</param>
         /// <param name="exchange">The exchange where the order will be placed, defaults to 'Smart'</param>
         /// <returns>A new IB contract for the order</returns>
-        private Contract CreateContract(Symbol symbol, string exchange = null)
+        protected Contract CreateContract(Symbol symbol, string exchange = null)
         {
             var securityType = ConvertSecurityType(symbol.ID.SecurityType);
             var ibSymbol = _symbolMapper.GetBrokerageSymbol(symbol);
@@ -2109,7 +2109,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// Handles the threading issues of creating an IB order ID
         /// </summary>
         /// <returns>The new IB ID</returns>
-        private int GetNextBrokerageOrderId()
+        protected int GetNextBrokerageOrderId()
         {
             // spin until we get a next valid id, this should only execute if we create a new instance
             // and immediately try to place an order
@@ -2131,7 +2131,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Increments the client ID for communication with the gateway
         /// </summary>
-        private static int IncrementClientId()
+        protected static int IncrementClientId()
         {
             return Interlocked.Increment(ref _nextClientId);
         }
@@ -2164,7 +2164,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return result;
         }
 
-        private void HandleBrokerTime(object sender, IB.CurrentTimeUtcEventArgs e)
+        protected void HandleBrokerTime(object sender, IB.CurrentTimeUtcEventArgs e)
         {
             // keep track of clock drift
             _brokerTimeDiff = e.CurrentTimeUtc.Subtract(DateTime.UtcNow);
@@ -2799,7 +2799,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             Log.Trace("InteractiveBrokersBrokerage.CheckIbGateway(): end");
         }
 
-        private readonly ConcurrentDictionary<Symbol, int> _subscribedSymbols = new ConcurrentDictionary<Symbol, int>();
+        protected readonly ConcurrentDictionary<Symbol, int> _subscribedSymbols = new ConcurrentDictionary<Symbol, int>();
         private readonly ConcurrentDictionary<int, Symbol> _subscribedTickets = new ConcurrentDictionary<int, Symbol>();
         private readonly Dictionary<Symbol, Symbol> _underlyings = new Dictionary<Symbol, Symbol>();
         private readonly ConcurrentDictionary<Symbol, decimal> _lastPrices = new ConcurrentDictionary<Symbol, decimal>();
