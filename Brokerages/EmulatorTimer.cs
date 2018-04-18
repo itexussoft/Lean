@@ -13,8 +13,9 @@ namespace QuantConnect.Brokerages
 {
     public class EmulatorTimer
     {
-        private Emulator emulator;
-        private readonly ScheduledEventHandler scheduledEventHandler;
+        private readonly Emulator emulator;
+        private readonly ScheduledEventHandler scheduledEventHandler = new ScheduledEventHandler();
+        private readonly IOrderProvider brokerageTransactionHandler;
 
         private int currentTickType = (int)TickType.LastPrice;
 
@@ -33,16 +34,23 @@ namespace QuantConnect.Brokerages
         private static readonly TimeSpan StartTickerPrice = AlgorithmHelper.GetExecutionTime("9:20:00");
         private static readonly TimeSpan StartExecutionDetails = AlgorithmHelper.GetExecutionTime("9:30:00");
 
-        private readonly IOrderProvider brokerageTransactionHandler;
+
 
         public EmulatorTimer(Emulator emulator, IOrderProvider brokerageTransactionHandler)
         {
             this.emulator = emulator;
             this.brokerageTransactionHandler = brokerageTransactionHandler;
-            scheduledEventHandler = new ScheduledEventHandler();
+        }
 
-            scheduledEventHandler.AddScheduledEvent(StartTickerPrice, TickerPriceInvoke);
-            scheduledEventHandler.AddScheduledEvent(StartExecutionDetails, ExecutionDetailsInvoke);
+        public void AddTimerEvents()
+        {
+            this.scheduledEventHandler.AddScheduledEvent(StartTickerPrice, TickerPriceInvoke);
+            this.scheduledEventHandler.AddScheduledEvent(StartExecutionDetails, ExecutionDetailsInvoke);
+        }
+
+        public void InitializeTimer()
+        {
+            this.scheduledEventHandler.Initialize();
         }
 
         public void TickerPriceInvoke()

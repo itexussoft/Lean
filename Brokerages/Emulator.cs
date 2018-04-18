@@ -874,7 +874,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             else
             {
                 var ibOrder = ConvertOrder(order, contract, ibOrderId);
-                Thread.Sleep(50);
+                Thread.Sleep(20);
             }
         }
 

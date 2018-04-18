@@ -192,11 +192,7 @@
     <Compile Include="GDAX\GDAXBrokerage.Messaging.cs" />
     <Compile Include="GDAX\OrderBook.cs" />
     <Compile Include="IbClasses\AlgorithmHelper.cs" />
-    <Compile Include="IbClasses\MOOOrderTicket.cs" />
-    <Compile Include="IbClasses\OrderTag.cs" />
-    <Compile Include="IbClasses\PRule.cs" />
     <Compile Include="IbClasses\ScheduledEventHandler.cs" />
-    <Compile Include="IbClasses\SymbolData.cs" />
     <Compile Include="IWebSocket.cs" />
     <Compile Include="GDAX\Messages.cs" />
     <Compile Include="WebSocketError.cs" />
