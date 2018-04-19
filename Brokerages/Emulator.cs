@@ -47,6 +47,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     {
         private List<Contract> contracts { get; set; }
 
+        public event Action<int> OrderPlaced;
+
         public List<Contract> Contracts
         {
             get
@@ -65,6 +67,41 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 return base._client != null && base._client.Connected && !base._disconnected1100Fired;
             }
         }
+
+        public Emulator(IAlgorithm algorithm, IOrderProvider orderProvider, ISecurityProvider securityProvider)
+            : this(
+                algorithm,
+                orderProvider,
+                securityProvider,
+                Config.Get("ib-account"),
+                Config.Get("ib-host", "LOCALHOST"),
+                Config.GetInt("ib-port", 4001),
+                Config.GetValue("ib-agent-description", IB.AgentDescription.Individual)
+                )
+        {
+        }
+
+        /// <summary>
+        /// Creates a new InteractiveBrokersBrokerage for the specified account
+        /// </summary>
+        /// <param name="algorithm">The algorithm instance</param>
+        /// <param name="orderProvider">An instance of IOrderProvider used to fetch Order objects by brokerage ID</param>
+        /// <param name="securityProvider">The security provider used to give access to algorithm securities</param>
+        /// <param name="account">The account used to connect to IB</param>
+        public Emulator(IAlgorithm algorithm, IOrderProvider orderProvider, ISecurityProvider securityProvider, string account)
+            : this(
+                algorithm,
+                orderProvider,
+                securityProvider,
+                account,
+                Config.Get("ib-host", "LOCALHOST"),
+                Config.GetInt("ib-port", 4001),
+                Config.GetValue("ib-agent-description", IB.AgentDescription.Individual)
+                )
+        {
+        }
+
+      
 
         /// <summary>
         /// Creates a new InteractiveBrokersBrokerage from the specified values
@@ -144,6 +181,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             {
                 var ibOrder = ConvertOrder(order, contract, ibOrderId);
                 Thread.Sleep(20);
+
+                this.OrderPlaced?.Invoke(ibOrder.OrderId);
             }
         }
 

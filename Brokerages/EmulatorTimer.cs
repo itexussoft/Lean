@@ -4,6 +4,7 @@ using QuantConnect.Brokerages.InteractiveBrokers;
 using QuantConnect.Interfaces;
 using QuantConnect.Securities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +18,7 @@ namespace QuantConnect.Brokerages
         private readonly ScheduledEventHandler scheduledEventHandler = new ScheduledEventHandler();
         private readonly IOrderProvider brokerageTransactionHandler;
 
-        private int currentTickType = (int)TickType.LastPrice;
+        private int currentTickType = (int)9;
 
         private Execution execution = new Execution()
         {
@@ -31,21 +32,22 @@ namespace QuantConnect.Brokerages
             LastPrice = 4
         }
 
-        private static readonly TimeSpan StartTickerPrice = AlgorithmHelper.GetExecutionTime("11:34:00");
-        private static readonly TimeSpan StartExecutionDetails = AlgorithmHelper.GetExecutionTime("9:30:00");
+        private static readonly TimeSpan StartTickerPrice = AlgorithmHelper.GetExecutionTime("05:18:00");
+        private static readonly TimeSpan StartExecutionDetails = AlgorithmHelper.GetExecutionTime("05:18:01");
 
 
 
         public EmulatorTimer(Emulator emulator, IOrderProvider brokerageTransactionHandler)
         {
             this.emulator = emulator;
+            this.emulator.OrderPlaced += ExecutionDetailsInvoke;
             this.brokerageTransactionHandler = brokerageTransactionHandler;
         }
 
         public void AddTimerEvents()
         {
             this.scheduledEventHandler.AddScheduledEvent(StartTickerPrice, TickerPriceInvoke);
-            this.scheduledEventHandler.AddScheduledEvent(StartExecutionDetails, ExecutionDetailsInvoke);
+            //this.scheduledEventHandler.AddScheduledEvent(StartExecutionDetails, ExecutionDetailsInvoke);
         }
 
         public void InitializeTimer()
@@ -55,22 +57,32 @@ namespace QuantConnect.Brokerages
 
         public void TickerPriceInvoke()
         {
+            var copy = CloneDictionaryCloningValues(this.emulator.SubscribedSymbols);
             foreach (var symbol in this.emulator.SubscribedSymbols)
             {
                 this.emulator.Client.tickPrice(symbol.Value, currentTickType, new Random().NextDouble() * 100, new TickAttrib());
             }
         }
 
-        public void ExecutionDetailsInvoke()
+        public void ExecutionDetailsInvoke(int orderId)
         {
             Contract contract;
-            var orders = this.brokerageTransactionHandler.GetOrders();
-            foreach (var order in orders)
+            var order = this.brokerageTransactionHandler.GetOrderById(orderId);
+
+            contract = this.emulator.Contracts.FirstOrDefault(x => x.Symbol == order.Symbol.Value);
+            execution.OrderId = orderId;
+            this.emulator.Client.execDetails(0, contract, execution);
+        }
+
+        public Dictionary<TKey, TValue> CloneDictionaryCloningValues<TKey, TValue>
+                    (ConcurrentDictionary<TKey, TValue> original)
+        {
+            Dictionary<TKey, TValue> ret = new Dictionary<TKey, TValue>(original.Count);
+            foreach (KeyValuePair<TKey, TValue> entry in original)
             {
-                contract = this.emulator.Contracts.FirstOrDefault(x => x.Symbol == order.Symbol.Value);
-                execution.OrderId = order.Id;
-                this.emulator.Client.execDetails(0, contract, execution);
+                ret.Add(entry.Key, entry.Value);
             }
+            return ret;
         }
     }
 }
