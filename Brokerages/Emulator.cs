@@ -45,7 +45,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     /// </summary>
     public sealed class Emulator : InteractiveBrokersBrokerage
     {
-        private List<Contract> contracts { get; set; }
+        private List<Contract> contracts { get; set; } = new List<Contract>();
 
         public event Action<int> OrderPlaced;
 
@@ -122,7 +122,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             get
             {
-                return base._subscribedSymbols;
+                return subscribedSymbolsStatic;
             }
         }
 

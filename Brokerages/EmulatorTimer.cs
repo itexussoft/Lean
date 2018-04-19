@@ -32,11 +32,9 @@ namespace QuantConnect.Brokerages
             LastPrice = 4
         }
 
-        private static readonly TimeSpan StartTickerPrice = AlgorithmHelper.GetExecutionTime("05:18:00");
-        private static readonly TimeSpan StartExecutionDetails = AlgorithmHelper.GetExecutionTime("05:18:01");
-
-
-
+        private static readonly TimeSpan StartTickerPrice = AlgorithmHelper.GetExecutionTime("12:17:00");
+        private static readonly TimeSpan StartExecutionDetails = AlgorithmHelper.GetExecutionTime("10:59:01");
+        
         public EmulatorTimer(Emulator emulator, IOrderProvider brokerageTransactionHandler)
         {
             this.emulator = emulator;
@@ -58,7 +56,7 @@ namespace QuantConnect.Brokerages
         public void TickerPriceInvoke()
         {
             var copy = CloneDictionaryCloningValues(this.emulator.SubscribedSymbols);
-            foreach (var symbol in this.emulator.SubscribedSymbols)
+            foreach (var symbol in copy)
             {
                 this.emulator.Client.tickPrice(symbol.Value, currentTickType, new Random().NextDouble() * 100, new TickAttrib());
             }
@@ -67,7 +65,7 @@ namespace QuantConnect.Brokerages
         public void ExecutionDetailsInvoke(int orderId)
         {
             Contract contract;
-            var order = this.brokerageTransactionHandler.GetOrderById(orderId);
+            var order = this.brokerageTransactionHandler.GetOrderByBrokerageId(orderId);
 
             contract = this.emulator.Contracts.FirstOrDefault(x => x.Symbol == order.Symbol.Value);
             execution.OrderId = orderId;

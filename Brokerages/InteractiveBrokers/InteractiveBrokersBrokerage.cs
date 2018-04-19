@@ -2262,6 +2262,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                         }
                     }
                 }
+
+                subscribedSymbolsStatic = new ConcurrentDictionary<Symbol, int>(_subscribedSymbols);
             }
             catch (Exception err)
             {
@@ -2800,6 +2802,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         }
 
         protected readonly ConcurrentDictionary<Symbol, int> _subscribedSymbols = new ConcurrentDictionary<Symbol, int>();
+        protected static ConcurrentDictionary<Symbol, int> subscribedSymbolsStatic = new ConcurrentDictionary<Symbol, int>();
         private readonly ConcurrentDictionary<int, Symbol> _subscribedTickets = new ConcurrentDictionary<int, Symbol>();
         private readonly Dictionary<Symbol, Symbol> _underlyings = new Dictionary<Symbol, Symbol>();
         private readonly ConcurrentDictionary<Symbol, decimal> _lastPrices = new ConcurrentDictionary<Symbol, decimal>();
