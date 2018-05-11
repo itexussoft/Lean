@@ -64,7 +64,7 @@ namespace QuantConnect.Securities
             security.FeeModel = _brokerageModel.GetFeeModel(security);
             security.SlippageModel = _brokerageModel.GetSlippageModel(security);
             security.SettlementModel = _brokerageModel.GetSettlementModel(security, _brokerageModel.AccountType);
-
+            //TODO: WTP-159: issue possible here
             if (seedSecurity)
             {
                 // Do not seed canonical symbols
