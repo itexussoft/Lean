@@ -1311,6 +1311,7 @@ namespace QuantConnect.Algorithm
 
             try
             {
+                Logging.Log.Trace($"Algorithm.AddSecurity(): Resolve market {symbol}");
                 if (market == null)
                 {
                     if (!BrokerageModel.DefaultMarkets.TryGetValue(securityType, out market))
@@ -1318,21 +1319,22 @@ namespace QuantConnect.Algorithm
                         throw new Exception("No default market set for security type: " + securityType);
                     }
                 }
-
+                Logging.Log.Trace($"Algorithm.AddSecurity(): TryGetSymbol {symbol}");
                 Symbol symbolObject;
                 if (!SymbolCache.TryGetSymbol(symbol, out symbolObject))
                 {
                     symbolObject = QuantConnect.Symbol.Create(symbol, securityType, market);
                 }
-
+                Logging.Log.Trace($"Algorithm.AddSecurity(): CreateSecurity {symbol}");
                 var security = SecurityManager.CreateSecurity(Portfolio, SubscriptionManager, _marketHoursDatabase, _symbolPropertiesDatabase, SecurityInitializer,
                     symbolObject, resolution, fillDataForward, leverage, extendedMarketHours, false, false, LiveMode);
-
+                Logging.Log.Trace($"Algorithm.AddSecurity(): AddToUserDefinedUniverse {symbol}");
                 AddToUserDefinedUniverse(security);
                 return security;
             }
             catch (Exception err)
             {
+                Logging.Log.Trace($"Algorithm.AddSecurity(): Message: {err.Message}, StackTrace: {err.StackTrace}");
                 Error("Algorithm.AddSecurity(): " + err);
                 return null;
             }
