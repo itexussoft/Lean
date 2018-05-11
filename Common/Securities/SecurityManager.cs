@@ -324,14 +324,16 @@ namespace QuantConnect.Securities
             bool addToSymbolCache = true,
             bool isFilteredSubscription = true)
         {
+            Logging.Log.Trace($"CreateSecurity: subscriptionDataTypes {symbol.Value}");
             if (!subscriptionDataTypes.Any())
             {
                 throw new ArgumentNullException(nameof(subscriptionDataTypes), "At least one type needed to create security");
             }
-
+            Logging.Log.Trace($"CreateSecurity: SymbolCache.Set {symbol.Value}");
             // add the symbol to our cache
             if (addToSymbolCache) SymbolCache.Set(symbol.Value, symbol);
 
+            Logging.Log.Trace($"CreateSecurity: SubscriptionDataConfigList {symbol.Value}");
             // Add the symbol to Data Manager -- generate unified data streams for algorithm events
             var configList = new SubscriptionDataConfigList(symbol);
             configList.AddRange(from subscriptionDataType 
@@ -343,7 +345,7 @@ namespace QuantConnect.Securities
                                                                exchangeHours.TimeZone, isCustomData, 
                                                                fillDataForward, extendedMarketHours, 
                                                                isInternalFeed, isFilteredSubscription));
-
+            Logging.Log.Trace($"CreateSecurity: securityPortfolioManager.CashBook.ContainsKey {symbol.Value}");
             // verify the cash book is in a ready state
             var quoteCurrency = symbolProperties.QuoteCurrency;
             if (!securityPortfolioManager.CashBook.ContainsKey(quoteCurrency))
@@ -351,6 +353,7 @@ namespace QuantConnect.Securities
                 // since we have none it's safe to say the conversion is zero
                 securityPortfolioManager.CashBook.Add(quoteCurrency, 0, 0);
             }
+            Logging.Log.Trace($"CreateSecurity: symbol.ID.SecurityType == SecurityType.Forex {symbol.Value}");
             if (symbol.ID.SecurityType == SecurityType.Forex || symbol.ID.SecurityType == SecurityType.Crypto)
             {
                 // decompose the symbol into each currency pair
@@ -368,13 +371,14 @@ namespace QuantConnect.Securities
                     securityPortfolioManager.CashBook.Add(quoteCurrency, 0, 0);
                 }
             }
-
+            Logging.Log.Trace($"CreateSecurity: securityPortfolioManager.CashBook {symbol.Value}");
             var quoteCash = securityPortfolioManager.CashBook[symbolProperties.QuoteCurrency];
-
+            Logging.Log.Trace($"CreateSecurity: switch (configList.Symbol.ID.SecurityType) {symbol.Value}");
             Security security;
             switch (configList.Symbol.ID.SecurityType)
             {
                 case SecurityType.Equity:
+                    Logging.Log.Trace($"CreateSecurity: new Equity.Equity {symbol.Value}");
                     security = new Equity.Equity(symbol, exchangeHours, quoteCash, symbolProperties);
                     break;
 
@@ -406,16 +410,16 @@ namespace QuantConnect.Securities
                     security = new Security(symbol, exchangeHours, quoteCash, symbolProperties);
                     break;
             }
-
+            Logging.Log.Trace($"CreateSecurity: configList.IsInternalFeed {symbol.Value}");
             // if we're just creating this security and it only has an internal
             // feed, mark it as non-tradable since the user didn't request this data
             if (!configList.IsInternalFeed)
             {
                 security.IsTradable = true;
             }
-
+            Logging.Log.Trace($"CreateSecurity: security.AddData {symbol.Value}");
             security.AddData(configList);
-
+            Logging.Log.Trace($"CreateSecurity: securityInitializer.Initialize {symbol.Value}");
             // invoke the security initializer
             securityInitializer.Initialize(security, true);
             
@@ -423,12 +427,14 @@ namespace QuantConnect.Securities
             // method take precedence over the intializer
             if (leverage > 0)
             {
+                Logging.Log.Trace($"CreateSecurity: security.SetLeverage {symbol.Value}");
                 security.SetLeverage(leverage);
             }
 
             // In live mode, equity assumes specific price variation model
             if (isLiveMode && security.Type == SecurityType.Equity)
             {
+                Logging.Log.Trace($"CreateSecurity: security.PriceVariationModel {symbol.Value}");
                 security.PriceVariationModel = new EquityPriceVariationModel();
             }
 
@@ -502,15 +508,21 @@ namespace QuantConnect.Securities
             bool addToSymbolCache = true
             )
         {
+            Logging.Log.Trace($"SecurityManager: marketHoursDatabase.GetEntry {symbol.Value}");
             var marketHoursDbEntry = marketHoursDatabase.GetEntry(symbol.ID.Market, symbol, symbol.ID.SecurityType);
             var exchangeHours = marketHoursDbEntry.ExchangeHours;
 
+            Logging.Log.Trace($"SecurityManager: CashBook.AccountCurrency {symbol.Value}");
             var defaultQuoteCurrency = CashBook.AccountCurrency;
             if (symbol.ID.SecurityType == SecurityType.Forex || symbol.ID.SecurityType == SecurityType.Crypto) defaultQuoteCurrency = symbol.Value.Substring(3);
+
+            Logging.Log.Trace($"SecurityManager: symbolPropertiesDatabase.GetSymbolProperties {symbol.Value}");
             var symbolProperties = symbolPropertiesDatabase.GetSymbolProperties(symbol.ID.Market, symbol, symbol.ID.SecurityType, defaultQuoteCurrency);
 
+            Logging.Log.Trace($"SecurityManager: subscriptionManager.LookupSubscriptionConfigDataTypes {symbol.Value}");
             var types = subscriptionManager.LookupSubscriptionConfigDataTypes(symbol.SecurityType, resolution, symbol.IsCanonical());
 
+            Logging.Log.Trace($"SecurityManager: CreateSecurity {symbol.Value}");
             return CreateSecurity(types, securityPortfolioManager, subscriptionManager, exchangeHours, marketHoursDbEntry.DataTimeZone, symbolProperties, securityInitializer, symbol, resolution,
                 fillDataForward, leverage, extendedMarketHours, isInternalFeed, isCustomData, isLiveMode, addToSymbolCache);
         }

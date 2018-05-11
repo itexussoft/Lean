@@ -327,43 +327,52 @@ namespace QuantConnect.Algorithm
         {
             // if we are adding a non-internal security which is also the benchmark, we remove it first
             Security existingSecurity;
+            Logging.Log.Trace($"AddToUserDefinedUniverse: Securities.TryGetValue");
             if (Securities.TryGetValue(security.Symbol, out existingSecurity))
             {
+                Logging.Log.Trace($"AddToUserDefinedUniverse: Securities.TryGetValue");
                 if (!security.IsInternalFeed() && existingSecurity.Symbol == _benchmarkSymbol)
                 {
+                    Logging.Log.Trace($"AddToUserDefinedUniverse: UniverseManager.Values.OfType");
                     var securityUniverse = UniverseManager.Values.OfType<UserDefinedUniverse>().FirstOrDefault(x => x.Members.ContainsKey(security.Symbol));
                     if (securityUniverse != null)
                     {
                         securityUniverse.Remove(security.Symbol);
                     }
-
+                    Logging.Log.Trace($"AddToUserDefinedUniverse: Securities.Remove");
                     Securities.Remove(security.Symbol);
                 }
             }
-
+            Logging.Log.Trace($"AddToUserDefinedUniverse: Securities.Add");
             Securities.Add(security);
 
             // add this security to the user defined universe
             Universe universe;
             var subscription = security.Subscriptions.First();
+            Logging.Log.Trace($"AddToUserDefinedUniverse: UserDefinedUniverse.CreateSymbol");
             var universeSymbol = UserDefinedUniverse.CreateSymbol(subscription.SecurityType, subscription.Market);
+            Logging.Log.Trace($"AddToUserDefinedUniverse: UniverseManager.TryGetValue");
             if (!UniverseManager.TryGetValue(universeSymbol, out universe))
             {
                 // create a new universe, these subscription settings don't currently get used
                 // since universe selection proper is never invoked on this type of universe
+                Logging.Log.Trace($"AddToUserDefinedUniverse: SubscriptionDataConfig");
                 var uconfig = new SubscriptionDataConfig(subscription, symbol: universeSymbol, isInternalFeed: true, fillForward: false);
+                Logging.Log.Trace($"AddToUserDefinedUniverse: UserDefinedUniverse(uconfig");
                 universe = new UserDefinedUniverse(uconfig,
                     new UniverseSettings(security.Resolution, security.Leverage, security.IsFillDataForward, security.IsExtendedMarketHours, TimeSpan.Zero),
                     SecurityInitializer,
                     QuantConnect.Time.OneDay,
                     new List<Symbol> { security.Symbol }
                     );
+                Logging.Log.Trace($"AddToUserDefinedUniverse: UniverseManager.Add");
                 UniverseManager.Add(universeSymbol, universe);
             }
-            
+            Logging.Log.Trace($"AddToUserDefinedUniverse: universe as UserDefinedUniverse");
             var userDefinedUniverse = universe as UserDefinedUniverse;
             if (userDefinedUniverse != null)
             {
+                Logging.Log.Trace($"AddToUserDefinedUniverse: userDefinedUniverse.Add");
                 userDefinedUniverse.Add(security.Symbol);
             }
             else
