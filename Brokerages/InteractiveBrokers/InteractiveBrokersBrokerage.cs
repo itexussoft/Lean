@@ -478,30 +478,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             this.UpdateAccountSummary?.Invoke(sender, e);
         }
 
-        public class QQPortfolioPosition
-        {
-            public string Contract { get; set; }
-
-            public int Position { get; set; }
-
-            public double MarketPrice { get; set; }
-
-            public double MarketValue { get; set; }
-
-            public double AverageCost { get; set; }
-
-            public double UnrealisedPnL { get; set; }
-
-            public double UnrealizedPnL => UnrealisedPnL;
-
-            public double RealisedPnL { get; set; }
-
-            public double RealizedPnL => RealisedPnL;
-
-            public string AccountName { get; set; }
-        }
-
-
         private void _client_UpdatePortfolio(object sender, IB.UpdatePortfolioEventArgs args)
         {
             this.UpdatePortrolioPositions?.Invoke(sender, args);
