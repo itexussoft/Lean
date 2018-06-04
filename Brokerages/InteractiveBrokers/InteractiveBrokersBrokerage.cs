@@ -45,10 +45,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     /// </summary>
     public sealed class InteractiveBrokersBrokerage : Brokerage, IDataQueueHandler, IDataQueueUniverseProvider
     {
-        public event EventHandler<IB.UpdateAccountValueEventArgs> UpdateAccountSummary;
-
-        public event EventHandler<IB.UpdatePortfolioEventArgs> UpdatePortrolioPositions;
-
         // next valid order id for this client
         private int _nextValidId;
         // next valid client id for the gateway/tws
@@ -451,36 +447,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             this.AccountHoldingsTasks(holdings);
 
             return holdings;
-        }
-
-        EventHandler<IB.AccountSummaryEventArgs> accountSummary;
-
-        public void SetSubscriprions(string accountNumber)
-        {
-            _client.UpdateAccountValue += _client_UpdateAccountValue;
-            _client.UpdatePortfolio += _client_UpdatePortfolio;
-
-            _client.ClientSocket.reqAccountUpdates(true, accountNumber);
-            _client.ClientSocket.reqPositions();
-        }
-
-        public void RemoveSubscriptions(string accountNumber)
-        {
-            _client.ClientSocket.reqAccountUpdates(false, accountNumber);
-            _client.ClientSocket.cancelPositions();
-
-            _client.UpdateAccountValue -= _client_UpdateAccountValue;
-            _client.UpdatePortfolio -= _client_UpdatePortfolio;
-        }
-
-        private void _client_UpdateAccountValue(object sender, IB.UpdateAccountValueEventArgs e)
-        {
-            this.UpdateAccountSummary?.Invoke(sender, e);
-        }
-
-        private void _client_UpdatePortfolio(object sender, IB.UpdatePortfolioEventArgs args)
-        {
-            this.UpdatePortrolioPositions?.Invoke(sender, args);
         }
 
         public Dictionary<string, string> GetAccountSummary()
