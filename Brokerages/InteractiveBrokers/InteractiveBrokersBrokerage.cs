@@ -2648,7 +2648,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             string resolution,
             string dataType)
         {
-            const int timeOut = 60; // seconds timeout
+            const int timeOut = 10; // seconds timeout
 
             var history = new List<TradeBar>();
             var dataDownloading = new AutoResetEvent(false);
@@ -2696,6 +2696,18 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                         pacing = true;
                     }
                     if (args.Code == 162 && args.Message.Contains("no data"))
+                    {
+                        dataDownloaded.Set();
+                    }
+                    //OTCMKTS case
+                    //ErrorCode: 162 - Historical Market Data Service error message:No market data permissions for ARCAEDGE STK. Origin: GetHistory: STK BDORY USD Smart
+                    if (args.Code == 162 && args.Message.ToLowerInvariant().Contains("no market data"))
+                    {
+                        dataDownloaded.Set();
+                    }
+                    //DK case
+                    //ErrorCode: 162 - Historical Market Data Service error message:No historical market data for 1490/STK@NYSENBBO Last 60
+                    if (args.Code == 162 && args.Message.ToLowerInvariant().Contains("no historical market data for 1490/stk@nysenbbo"))
                     {
                         dataDownloaded.Set();
                     }
