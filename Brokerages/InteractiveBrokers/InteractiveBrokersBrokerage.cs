@@ -518,7 +518,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return _accountData.CashBalances.Select(x => new Cash(x.Key, x.Value, GetUsdConversion(x.Key))).ToList();
         }
 
-        public string GetPrevDayEWL()
+        public string GetPrevDayELV()
         {
             CheckIbGateway();
 
