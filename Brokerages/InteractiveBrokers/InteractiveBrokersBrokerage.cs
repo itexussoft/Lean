@@ -92,7 +92,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private readonly BusyBlockingCollection<IB.ExecutionDetailsEventArgs> _executionDetailsQueue = new BusyBlockingCollection<IB.ExecutionDetailsEventArgs>();
 
         // Prioritized list of exchanges used to find right futures contract
-        private readonly Dictionary<string, string> _futuresExchanges = new Dictionary<string, string>
+        private readonly Dictionary<string, string> _futuresExchanges = new Dictionary< string, string>
         {
             { Market.Globex, "GLOBEX" },
             { Market.NYMEX, "NYMEX" },
@@ -208,7 +208,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             //_client.OpenOrder += HandleOpenOrder;
             //_client.OpenOrderEnd += HandleOpenOrderEnd;
             _client.UpdateAccountValue += HandleUpdateAccountValue;
-            //_client.UpdateAccountValue += _client_UpdateAccountValue;
             _client.ExecutionDetails += HandleExecutionDetails;
             _client.Error += HandleError;
             //_client.TickPrice += HandleTickPrice;
@@ -259,8 +258,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 {
                     Log.Error("InteractiveBrokersBrokerage.ResetHandler(): Error in reset handler thread: " + exception);
                 }
-            })
-            { IsBackground = true }.Start();
+            }) { IsBackground = true }.Start();
         }
 
         /// <summary>
@@ -632,8 +630,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                         }
 
                         Log.Trace("IB message processing thread ended: #" + Thread.CurrentThread.ManagedThreadId);
-                    })
-                    { IsBackground = true };
+                    }) { IsBackground = true };
 
                     _messageProcessingThread.Start();
 
@@ -948,7 +945,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             ContractDetails details;
             if (_contractDetails.TryGetValue(GetUniqueKey(contract), out details))
             {
-                return (decimal)details.MinTick;
+                return (decimal) details.MinTick;
             }
 
             details = GetContractDetails(contract);
@@ -958,7 +955,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 return 0;
             }
 
-            return (decimal)details.MinTick;
+            return (decimal) details.MinTick;
         }
 
         private ContractDetails GetContractDetails(Contract contract)
@@ -1787,7 +1784,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     break;
 
                 default:
-                    throw new InvalidEnumArgumentException("orderType", (int)orderType, typeof(OrderType));
+                    throw new InvalidEnumArgumentException("orderType", (int) orderType, typeof (OrderType));
             }
 
             order.BrokerId.Add(ibOrder.OrderId.ToString());
@@ -1881,7 +1878,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             switch (direction)
             {
-                case OrderDirection.Buy: return IB.ActionSide.Buy;
+                case OrderDirection.Buy:  return IB.ActionSide.Buy;
                 case OrderDirection.Sell: return IB.ActionSide.Sell;
                 case OrderDirection.Hold: return IB.ActionSide.Undefined;
                 default:
@@ -1896,12 +1893,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             switch (type)
             {
-                case OrderType.Market: return IB.OrderType.Market;
-                case OrderType.Limit: return IB.OrderType.Limit;
-                case OrderType.StopMarket: return IB.OrderType.Stop;
-                case OrderType.StopLimit: return IB.OrderType.StopLimit;
-                case OrderType.MarketOnOpen: return IB.OrderType.Market;
-                case OrderType.MarketOnClose: return IB.OrderType.MarketOnClose;
+                case OrderType.Market:          return IB.OrderType.Market;
+                case OrderType.Limit:           return IB.OrderType.Limit;
+                case OrderType.StopMarket:      return IB.OrderType.Stop;
+                case OrderType.StopLimit:       return IB.OrderType.StopLimit;
+                case OrderType.MarketOnOpen:    return IB.OrderType.Market;
+                case OrderType.MarketOnClose:   return IB.OrderType.MarketOnClose;
                 default:
                     throw new InvalidEnumArgumentException("type", (int)type, typeof(OrderType));
             }
@@ -1914,10 +1911,10 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             switch (order.OrderType)
             {
-                case IB.OrderType.Limit: return OrderType.Limit;
-                case IB.OrderType.Stop: return OrderType.StopMarket;
-                case IB.OrderType.StopLimit: return OrderType.StopLimit;
-                case IB.OrderType.MarketOnClose: return OrderType.MarketOnClose;
+                case IB.OrderType.Limit:            return OrderType.Limit;
+                case IB.OrderType.Stop:             return OrderType.StopMarket;
+                case IB.OrderType.StopLimit:        return OrderType.StopLimit;
+                case IB.OrderType.MarketOnClose:    return OrderType.MarketOnClose;
 
                 case IB.OrderType.Market:
                     if (order.Tif == IB.TimeInForce.MarketOnOpen)
@@ -2047,7 +2044,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <returns></returns>
         private string ConvertResolution(Resolution resolution)
         {
-            switch (resolution)
+            switch(resolution)
             {
                 case Resolution.Tick:
                 case Resolution.Second:
@@ -2149,7 +2146,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private static decimal RoundPrice(decimal input, decimal minTick)
         {
             if (minTick == 0) return minTick;
-            return Math.Round(input / minTick) * minTick;
+            return Math.Round(input/minTick)*minTick;
         }
 
         /// <summary>
@@ -2758,7 +2755,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 var waitResult = 0;
                 while (waitResult == 0)
                 {
-                    waitResult = WaitHandle.WaitAny(new WaitHandle[] { dataDownloading, dataDownloaded }, timeOut * 1000);
+                    waitResult = WaitHandle.WaitAny(new WaitHandle[] {dataDownloading, dataDownloaded}, timeOut*1000);
                 }
 
                 Client.Error -= clientOnError;
