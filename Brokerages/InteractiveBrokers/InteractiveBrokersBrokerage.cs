@@ -49,12 +49,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private int _nextValidId;
         // next valid client id for the gateway/tws
 
-        #if DEBUG
-            private static int _nextClientId = 5;
-        #else
+#if DEBUG
+        private static int _nextClientId = 5;
+#else
             private static int _nextClientId;
-        #endif
-        
+#endif
+
         // next valid request id for queries
         private int _nextRequestId;
         private int _nextTickerId;
@@ -425,6 +425,45 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return holdings;
         }
 
+        public List<Holding> GetAllAccountHoldings()
+        {
+            CheckIbGateway();
+
+            if (!IsConnected)
+            {
+                Log.Trace("InteractiveBrokersBrokerage.GetAccountHoldings(): not connected, connecting now");
+                Connect();
+            }
+
+            var holdings = _accountData.AccountHoldings.Select(x => ObjectActivator.Clone(x.Value)).ToList();
+
+            // fire up tasks to resolve the conversion rates so we can do them in parallel
+            var tasks = holdings.Select(local =>
+            {
+                // we need to resolve the conversion rate for non-USD currencies
+                if (local.Type != SecurityType.Forex)
+                {
+                    // this assumes all non-forex are us denominated, we should add the currency to 'holding'
+                    local.ConversionRate = 1m;
+                    return null;
+                }
+                // if quote currency is in USD don't bother making the request
+                var currency = local.Symbol.Value.Substring(3);
+                if (currency == "USD")
+                {
+                    local.ConversionRate = 1m;
+                    return null;
+                }
+
+                // this will allow us to do this in parallel
+                return Task.Factory.StartNew(() => local.ConversionRate = GetUsdConversion(currency));
+            }).Where(x => x != null).ToArray();
+
+            Task.WaitAll(tasks, 5000);
+
+            return holdings;
+        }
+
         public Dictionary<string, string> GetAccountSummary()
         {
             return this.GetAccountSummary(AccountSummaryTags.GetAllTags());
@@ -435,12 +474,19 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             var requestId = GetNextRequestId();
             var manualResetEvent = new ManualResetEvent(false);
             var result = new Dictionary<string, string>();
-            
+
             EventHandler<IB.AccountSummaryEventArgs> accountSummary = (sender, args) =>
             {
                 if (args.RequestId == requestId)
                 {
-                    result.Add(args.Tag, args.Value);
+                    if (result.ContainsKey(args.Tag))
+                    {
+                        result[args.Tag] = args.Value;
+                    }
+                    else
+                    {
+                        result.Add(args.Tag, args.Value);
+                    }
                 }
             };
 
@@ -453,13 +499,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     manualResetEvent.Set();
                 }
             };
-            
+
             _client.AccountSummary += accountSummary;
             _client.AccountSummaryEnd += accountSummaryEnd;
 
             _client.ClientSocket.reqAccountSummary(requestId, "All", tag);
 
-            if (!manualResetEvent.WaitOne(5000))
+            if (!manualResetEvent.WaitOne(10000))
             {
                 throw new TimeoutException("InteractiveBrokersBrokerage.GetAccountSummary(): Operation took longer than 5 seconds.");
             }
@@ -485,6 +531,19 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
 
             return _accountData.CashBalances.Select(x => new Cash(x.Key, x.Value, GetUsdConversion(x.Key))).ToList();
+        }
+
+        public string GetPrevDayELV()
+        {
+            CheckIbGateway();
+
+            if (!IsConnected)
+            {
+                Log.Trace("InteractiveBrokersBrokerage.GetCashBalance(): not connected, connecting now");
+                Connect();
+            }
+
+            return _accountData.AccountProperties.FirstOrDefault(x => x.Key == "USD:PreviousDayEquityWithLoanValue").Value;
         }
 
         /// <summary>
@@ -1617,7 +1676,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             {
                 ibOrder.Tif = IB.TimeInForce.MarketOnOpen;
             }
-            
+
             if (order.Type == OrderType.MarketOnClose || order.Type == OrderType.StopMarket)
             {
                 ibOrder.Tif = IB.TimeInForce.Day;
@@ -2068,7 +2127,9 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 AveragePrice = Convert.ToDecimal(e.AverageCost) / multiplier,
                 MarketPrice = Convert.ToDecimal(e.MarketPrice),
                 ConversionRate = 1m, // this will be overwritten when GetAccountHoldings is called to ensure fresh values
-                CurrencySymbol = currencySymbol
+                CurrencySymbol = currencySymbol,
+                MarketValue = (decimal)e.MarketValue,
+                UnrealizedPnL = (decimal)e.UnrealisedPnl
             };
         }
 
