@@ -1461,7 +1461,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     Log.Error("InteractiveBrokersBrokerage.HandleOrderStatusUpdates(): Unable to locate order with BrokerageID " + update.OrderId);
                     return;
                 }
-
+                
                 // IB likes to duplicate/triplicate some events, so we fire non-fill events only if status changed
                 if (status != order.Status)
                 {
@@ -1882,7 +1882,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 case OrderDirection.Sell: return IB.ActionSide.Sell;
                 case OrderDirection.Hold: return IB.ActionSide.Undefined;
                 default:
-                    throw new InvalidEnumArgumentException("direction", (int)direction, typeof(OrderDirection));
+                    throw new InvalidEnumArgumentException("direction", (int) direction, typeof (OrderDirection));
             }
         }
 
