@@ -382,8 +382,22 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return orders;
         }
 
-        private void AccountHoldingsTasks(List<Holding> holdings)
+        /// <summary>
+        /// Gets all holdings for the account
+        /// </summary>
+        /// <returns>The current holdings from the account</returns>
+        public override List<Holding> GetAccountHoldings()
         {
+            CheckIbGateway();
+
+            if (!IsConnected)
+            {
+                Log.Trace("InteractiveBrokersBrokerage.GetAccountHoldings(): not connected, connecting now");
+                Connect();
+            }
+
+            var holdings = _accountData.AccountHoldings.Select(x => ObjectActivator.Clone(x.Value)).Where(x => x.Quantity != 0).ToList();
+
             // fire up tasks to resolve the conversion rates so we can do them in parallel
             var tasks = holdings.Select(local =>
             {
@@ -407,25 +421,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }).Where(x => x != null).ToArray();
 
             Task.WaitAll(tasks, 5000);
-        }
-
-        /// <summary>
-        /// Gets all holdings for the account
-        /// </summary>
-        /// <returns>The current holdings from the account</returns>
-        public override List<Holding> GetAccountHoldings()
-        {
-            CheckIbGateway();
-
-            if (!IsConnected)
-            {
-                Log.Trace("InteractiveBrokersBrokerage.GetAccountHoldings(): not connected, connecting now");
-                Connect();
-            }
-
-            var holdings = _accountData.AccountHoldings.Select(x => ObjectActivator.Clone(x.Value)).Where(x => x.Quantity != 0).ToList();
-
-            this.AccountHoldingsTasks(holdings);
 
             return holdings;
         }
@@ -442,7 +437,29 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             var holdings = _accountData.AccountHoldings.Select(x => ObjectActivator.Clone(x.Value)).ToList();
 
-            this.AccountHoldingsTasks(holdings);
+            // fire up tasks to resolve the conversion rates so we can do them in parallel
+            var tasks = holdings.Select(local =>
+            {
+                // we need to resolve the conversion rate for non-USD currencies
+                if (local.Type != SecurityType.Forex)
+                {
+                    // this assumes all non-forex are us denominated, we should add the currency to 'holding'
+                    local.ConversionRate = 1m;
+                    return null;
+                }
+                // if quote currency is in USD don't bother making the request
+                var currency = local.Symbol.Value.Substring(3);
+                if (currency == "USD")
+                {
+                    local.ConversionRate = 1m;
+                    return null;
+                }
+
+                // this will allow us to do this in parallel
+                return Task.Factory.StartNew(() => local.ConversionRate = GetUsdConversion(currency));
+            }).Where(x => x != null).ToArray();
+
+            Task.WaitAll(tasks, 5000);
 
             return holdings;
         }
