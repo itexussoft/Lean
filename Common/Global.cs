@@ -426,7 +426,9 @@ namespace QuantConnect
         /// Hour Resolution (4)
         Hour,
         /// Daily Resolution (5)
-        Daily
+        Daily,
+        /// ThirtyMinutes Resolution (6)
+        ThirtyMinutes
     }
 
     /// <summary>

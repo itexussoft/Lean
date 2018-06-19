@@ -731,6 +731,8 @@ namespace QuantConnect
                     return TimeSpan.FromSeconds(1);
                 case Resolution.Minute:
                     return TimeSpan.FromMinutes(1);
+                case Resolution.ThirtyMinutes:
+                    return TimeSpan.FromMinutes(30);
                 case Resolution.Hour:
                     return TimeSpan.FromHours(1);
                 case Resolution.Daily:

@@ -205,6 +205,9 @@ namespace QuantConnect.Data
                 case Resolution.Minute:
                     Increment = TimeSpan.FromMinutes(1);
                     break;
+                case Resolution.ThirtyMinutes:
+                    Increment = TimeSpan.FromMinutes(30);
+                    break;
                 case Resolution.Hour:
                     Increment = TimeSpan.FromHours(1);
                     break;

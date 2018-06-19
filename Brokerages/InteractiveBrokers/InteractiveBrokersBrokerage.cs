@@ -2070,6 +2070,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     return IB.BarSize.OneMinute;
                 case Resolution.Hour:
                     return IB.BarSize.OneHour;
+                case Resolution.ThirtyMinutes:
+                    return IB.BarSize.ThirtyMinutes;
                 case Resolution.Daily:
                 default:
                     return IB.BarSize.OneDay;
@@ -2090,6 +2092,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     return "60 S";
                 case Resolution.Minute:
                     return "1 D";
+                case Resolution.ThirtyMinutes:
                 case Resolution.Hour:
                     return "1 M";
                 case Resolution.Daily:
