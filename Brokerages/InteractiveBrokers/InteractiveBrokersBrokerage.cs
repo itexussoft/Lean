@@ -396,7 +396,17 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 Connect();
             }
 
-            var holdings = _accountData.AccountHoldings.Select(x => ObjectActivator.Clone(x.Value)).Where(x => x.Quantity != 0).ToList();
+            foreach (var accountHolding in _accountData.AccountHoldings)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetAccountHoldings(): accountHolding {accountHolding}");
+            }
+
+            var holdings = _accountData.AccountHoldings.Select(x => x.Value.Clone()).Where(x => x.Quantity != 0).ToList();
+
+            foreach (var accountHolding in holdings)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetAllAccountHoldings(): FILTEREDaccountHolding {accountHolding}");
+            }
 
             // fire up tasks to resolve the conversion rates so we can do them in parallel
             var tasks = holdings.Select(local =>
@@ -435,7 +445,17 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 Connect();
             }
 
-            var holdings = _accountData.AccountHoldings.Select(x => ObjectActivator.Clone(x.Value)).ToList();
+            foreach (var accountHolding in _accountData.AccountHoldings)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetAllAccountHoldings(): accountHolding {accountHolding}");
+            }
+
+            var holdings = _accountData.AccountHoldings.Select(x => x.Value.Clone()).ToList();
+
+            foreach (var accountHolding in holdings)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetAllAccountHoldings(): FILTEREDaccountHolding {accountHolding}");
+            }
 
             // fire up tasks to resolve the conversion rates so we can do them in parallel
             var tasks = holdings.Select(local =>
@@ -1648,9 +1668,28 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         private void HandlePortfolioUpdates(object sender, IB.UpdatePortfolioEventArgs e)
         {
-            _accountHoldingsResetEvent.Reset();
-            var holding = CreateHolding(e);
-            _accountData.AccountHoldings[holding.Symbol.Value] = holding;
+            try
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): " +
+                          $"Symbol: {e.Contract.Symbol} " +
+                          $"Position: {e.Position} " +
+                          $"MarketPrice: {e.MarketPrice} " +
+                          $"MarketValue: {e.MarketValue} " +
+                          $"AverageCost: {e.AverageCost} " +
+                          $"UnrealisedPnl: {e.UnrealisedPnl} " +
+                          $"RealisedPnl: {e.RealisedPnl} ");
+                _accountHoldingsResetEvent.Reset();
+                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): _accountHoldingsResetEvent.Reset();");
+                var holding = CreateHolding(e);
+                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): CreateHolding" +
+                          $"Holding {holding.ToString()}");
+                _accountData.AccountHoldings[holding.Symbol.Value] = holding;
+                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): finish");
+            }
+            catch (Exception ex)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): ERROR: {ex.Message}, Stack Trace: {ex.StackTrace}");
+            }
         }
 
         /// <summary>
@@ -2131,8 +2170,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 MarketPrice = Convert.ToDecimal(e.MarketPrice),
                 ConversionRate = 1m, // this will be overwritten when GetAccountHoldings is called to ensure fresh values
                 CurrencySymbol = currencySymbol,
-                MarketValue = (decimal)e.MarketValue,
-                UnrealizedPnL = (decimal)e.UnrealisedPnl
+                MarketValue = Convert.ToDecimal(e.MarketValue),
+                UnrealizedPnL = Convert.ToDecimal(e.UnrealisedPnl)
             };
         }
 
