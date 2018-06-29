@@ -1684,6 +1684,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): CreateHolding" +
                           $"Holding {holding.ToString()}");
                 _accountData.AccountHoldings[holding.Symbol.Value] = holding;
+                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): NEWHOLDING: {_accountData.AccountHoldings[holding.Symbol.Value]}");
+
                 Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): finish");
             }
             catch (Exception ex)
