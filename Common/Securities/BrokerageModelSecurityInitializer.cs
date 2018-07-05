@@ -78,7 +78,7 @@ namespace QuantConnect.Securities
                     }
                     else
                     {
-                        Log.Trace("BrokerageModelSecurityInitializer.Initialize(): Unable to seed security: " + security.Symbol.Value);
+                        Log.Error("BrokerageModelSecurityInitializer.Initialize(): Unable to seed security: " + security.Symbol.Value);
                     }
                 }
             }
