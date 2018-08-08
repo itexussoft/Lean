@@ -2699,7 +2699,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 yield return bar;
             }
 
-            Log.Trace("InteractiveBrokersBrokerage::GetHistory() Download completed");
+            Log.Trace($"InteractiveBrokersBrokerage::GetHistory() Download completed {request.Symbol.Value}");
         }
 
         private IEnumerable<TradeBar> GetHistory(
@@ -2806,7 +2806,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                         continue;
                     }
 
-                    Log.Trace("InteractiveBrokersBrokerage::GetHistory() History request timed out ({0} sec)", timeOut);
+                    Log.Trace("InteractiveBrokersBrokerage::GetHistory() History request timed out ({0} sec) {1}", timeOut, request.Symbol.Value);
                     break;
                 }
 
