@@ -2712,7 +2712,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             string resolution,
             string dataType)
         {
-            const int timeOut = 60; // seconds timeout
+            const int timeOut = 90; // seconds timeout
 
             var history = new List<TradeBar>();
             var dataDownloading = new AutoResetEvent(false);
