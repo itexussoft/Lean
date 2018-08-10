@@ -398,14 +398,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             foreach (var accountHolding in _accountData.AccountHoldings)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetAccountHoldings(): accountHolding {accountHolding}");
+                Log.Trace($"{this.InstanceIdentifier} InteractiveBrokersBrokerage.GetAccountHoldings(): accountHolding {accountHolding}");
             }
 
             var holdings = _accountData.AccountHoldings.Select(x => x.Value.Clone()).Where(x => x.Quantity != 0).ToList();
 
             foreach (var accountHolding in holdings)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetAllAccountHoldings(): FILTEREDaccountHolding {accountHolding}");
+                Log.Trace($"{this.InstanceIdentifier} InteractiveBrokersBrokerage.GetAllAccountHoldings(): FILTEREDaccountHolding {accountHolding}");
             }
 
             // fire up tasks to resolve the conversion rates so we can do them in parallel
@@ -1663,6 +1663,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             OnOrderEvent(orderEvent);
         }
 
+        public string InstanceIdentifier { get; set; } = "DEFAULT";
+
         /// <summary>
         /// Handle portfolio changed events from IB
         /// </summary>
@@ -1670,7 +1672,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             try
             {
-                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): " +
+                Log.Trace($"{this.InstanceIdentifier} InteractiveBrokersBrokerage.HandlePortfolioUpdates(): " +
                           $"Symbol: {e.Contract.Symbol} " +
                           $"Position: {e.Position} " +
                           $"MarketPrice: {e.MarketPrice} " +
@@ -1679,14 +1681,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                           $"UnrealisedPnl: {e.UnrealisedPnl} " +
                           $"RealisedPnl: {e.RealisedPnl} ");
                 _accountHoldingsResetEvent.Reset();
-                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): _accountHoldingsResetEvent.Reset();");
+                Log.Trace($"{this.InstanceIdentifier}InteractiveBrokersBrokerage.HandlePortfolioUpdates(): _accountHoldingsResetEvent.Reset();");
                 var holding = CreateHolding(e);
-                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): CreateHolding" +
+                Log.Trace($"{this.InstanceIdentifier}InteractiveBrokersBrokerage.HandlePortfolioUpdates(): CreateHolding" +
                           $"Holding {holding.ToString()}");
                 _accountData.AccountHoldings[holding.Symbol.Value] = holding;
-                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): NEWHOLDING: {_accountData.AccountHoldings[holding.Symbol.Value]}");
+                Log.Trace($"{this.InstanceIdentifier}InteractiveBrokersBrokerage.HandlePortfolioUpdates(): NEWHOLDING: {_accountData.AccountHoldings[holding.Symbol.Value]}");
 
-                Log.Trace($"InteractiveBrokersBrokerage.HandlePortfolioUpdates(): finish");
+                Log.Trace($"{this.InstanceIdentifier}InteractiveBrokersBrokerage.HandlePortfolioUpdates(): finish");
             }
             catch (Exception ex)
             {
