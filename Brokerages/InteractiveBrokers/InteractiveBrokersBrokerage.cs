@@ -2780,6 +2780,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                         {
                             dataDownloaded.Set();
                         }
+
+                        if (args.Code == 162)
+                        {
+                            dataDownloaded.Set();
+                        }
                     }
                 };
 
