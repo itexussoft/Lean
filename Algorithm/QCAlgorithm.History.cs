@@ -442,7 +442,7 @@ namespace QuantConnect.Algorithm
         /// </summary>
         /// <param name="security"><see cref="Security"/> object for which to retrieve historical data</param>
         /// <returns>A single <see cref="BaseData"/> object with the last known price</returns>
-        public BaseData GetLastKnownPrice(Security security)
+        public virtual BaseData GetLastKnownPrice(Security security)
         {
             if (security.Symbol.IsCanonical() || HistoryProvider == null)
             {
