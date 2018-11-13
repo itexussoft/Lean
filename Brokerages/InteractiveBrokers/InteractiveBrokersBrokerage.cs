@@ -45,6 +45,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     /// </summary>
     public sealed class InteractiveBrokersBrokerage : Brokerage, IDataQueueHandler, IDataQueueUniverseProvider
     {
+        public event EventHandler OnConnectionLost;
+
         // next valid order id for this client
         private int _nextValidId;
         // next valid client id for the gateway/tws
@@ -1269,6 +1271,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             // code 1100 is a connection failure, we'll wait a minute before exploding gracefully
             if (errorCode == 1100)
             {
+                this.OnConnectionLost?.Invoke(this, new EventArgs());
+
                 if (!_disconnected1100Fired)
                 {
                     _disconnected1100Fired = true;
