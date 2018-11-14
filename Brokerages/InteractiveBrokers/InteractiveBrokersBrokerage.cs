@@ -45,7 +45,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     /// </summary>
     public sealed class InteractiveBrokersBrokerage : Brokerage, IDataQueueHandler, IDataQueueUniverseProvider
     {
-        public event EventHandler OnConnectionLost;
+        public event EventHandler<string> OnConnectionLost;
 
         // next valid order id for this client
         private int _nextValidId;
@@ -92,6 +92,9 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private readonly InteractiveBrokersSymbolMapper _symbolMapper = new InteractiveBrokersSymbolMapper();
 
         private readonly BusyBlockingCollection<IB.ExecutionDetailsEventArgs> _executionDetailsQueue = new BusyBlockingCollection<IB.ExecutionDetailsEventArgs>();
+
+        private Func<DateTime> estNow;
+        private Func<TimeSpan, bool> isGatewayClosableTime;
 
         // Prioritized list of exchanges used to find right futures contract
         private readonly Dictionary<string, string> _futuresExchanges = new Dictionary< string, string>
@@ -188,7 +191,15 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <param name="host">host name or IP address of the machine where TWS is running. Leave blank to connect to the local host.</param>
         /// <param name="port">must match the port specified in TWS on the Configure&gt;API&gt;Socket Port field.</param>
         /// <param name="agentDescription">Used for Rule 80A describes the type of trader.</param>
-        public InteractiveBrokersBrokerage(IAlgorithm algorithm, IOrderProvider orderProvider, ISecurityProvider securityProvider, string account, string host, int port, string agentDescription = IB.AgentDescription.Individual)
+        public InteractiveBrokersBrokerage(
+            IAlgorithm algorithm, 
+            IOrderProvider orderProvider,
+            ISecurityProvider securityProvider,
+            string account, 
+            string host, 
+            int port,
+            string agentDescription = IB.AgentDescription.Individual
+            )
             : base("Interactive Brokers Brokerage")
         {
             _algorithm = algorithm;
@@ -269,6 +280,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         public IB.InteractiveBrokersClient Client
         {
             get { return _client; }
+        }
+
+        public void SetDateTimeFunctions(Func<DateTime> estNow, Func<TimeSpan, bool> isGatewayClosableTime)
+        {
+            this.estNow = estNow;
+            this.isGatewayClosableTime = isGatewayClosableTime;
         }
 
         /// <summary>
@@ -1271,7 +1288,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             // code 1100 is a connection failure, we'll wait a minute before exploding gracefully
             if (errorCode == 1100)
             {
-                this.OnConnectionLost?.Invoke(this, new EventArgs());
+                if(this.estNow != null && this.isGatewayClosableTime != null && this.OnConnectionLost != null)
+                {
+                    if (this.isGatewayClosableTime(this.estNow().TimeOfDay))
+                    {
+                        this.OnConnectionLost?.Invoke(this, this._account);
+                        return;
+                    }
+                }
 
                 if (!_disconnected1100Fired)
                 {
