@@ -22,6 +22,8 @@ namespace QuantConnect.Orders
     /// </summary>
     public abstract class OrderRequest
     {
+        public bool WhatIf { get; set; }
+
         /// <summary>
         /// Gets the type of this order request
         /// </summary>

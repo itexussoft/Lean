@@ -182,9 +182,9 @@ namespace QuantConnect.Algorithm
         /// <param name="asynchronous">Send the order asynchrously (false). Otherwise we'll block until it fills</param>
         /// <param name="tag">Place a custom order property or tag (e.g. indicator data).</param>
         /// <returns>int Order id</returns>
-        public OrderTicket MarketOrder(Symbol symbol, double quantity, bool asynchronous = false, string tag = "")
+        public OrderTicket MarketOrderWhatIf(Symbol symbol, double quantity, bool whatIf = false, bool asynchronous = false, string tag = "")
         {
-            return MarketOrder(symbol, (decimal)quantity, asynchronous, tag);
+            return MarketOrder(symbol, (decimal)quantity, asynchronous, tag, whatIf);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace QuantConnect.Algorithm
         /// <param name="asynchronous">Send the order asynchrously (false). Otherwise we'll block until it fills</param>
         /// <param name="tag">Place a custom order property or tag (e.g. indicator data).</param>
         /// <returns>int Order id</returns>
-        public OrderTicket MarketOrder(Symbol symbol, decimal quantity, bool asynchronous = false, string tag = "")
+        public OrderTicket MarketOrder(Symbol symbol, decimal quantity, bool asynchronous = false, string tag = "", bool whatIf = false)
         {
             var security = Securities[symbol];
 
@@ -215,6 +215,11 @@ namespace QuantConnect.Algorithm
             //}
 
             var request = CreateSubmitOrderRequest(OrderType.Market, security, quantity, tag, DefaultOrderProperties?.Clone());
+
+            if (whatIf)
+            {
+                request.WhatIf = true;
+            }
 
             // If warming up, do not submit
             if (IsWarmingUp)
