@@ -209,7 +209,7 @@ namespace QuantConnect.Orders
         public decimal GetValue(Security security)
         {
             var value = GetValueImpl(security);
-            return value*security.QuoteCurrency.ConversionRate*security.SymbolProperties.ContractMultiplier;
+            return value * security.QuoteCurrency.ConversionRate * security.SymbolProperties.ContractMultiplier;
         }
 
         /// <summary>
@@ -276,6 +276,7 @@ namespace QuantConnect.Orders
             order.Symbol = Symbol;
             order.Tag = Tag;
             order.Properties = Properties?.Clone();
+            order.WhatIf = WhatIf;
         }
 
         /// <summary>
@@ -289,13 +290,16 @@ namespace QuantConnect.Orders
             switch (request.OrderType)
             {
                 case OrderType.Market:
+                    Logging.Log.Trace($"Market:  request.WhatIf: { request.WhatIf}");
                     if (request.WhatIf)
                     {
-                        order = new MarketOrder(request.Symbol, request.Quantity, request.Time, request.Tag, request.OrderProperties);
+                        order = new MarketOrder(request.Symbol, request.Quantity, request.Time, true, request.Tag, request.OrderProperties);
+                        Logging.Log.Trace($"Must be true:  order.WhatIf: { order.WhatIf}");
                     }
                     else
                     {
-                        order = new MarketOrder(request.Symbol, request.Quantity, request.Time, true, request.Tag, request.OrderProperties);
+                        order = new MarketOrder(request.Symbol, request.Quantity, request.Time, request.Tag, request.OrderProperties);
+                        Logging.Log.Trace($"Must be false:  order.WhatIf: { order.WhatIf}");
                     }
                     break;
                 case OrderType.Limit:

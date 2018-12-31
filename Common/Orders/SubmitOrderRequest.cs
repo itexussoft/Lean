@@ -100,8 +100,8 @@ namespace QuantConnect.Orders
         /// <param name="time">The time this request was created</param>
         /// <param name="tag">A custom tag for this request</param>
         /// <param name="properties">The order properties for this request</param>
-        public SubmitOrderRequest(OrderType orderType, SecurityType securityType, Symbol symbol, decimal quantity, decimal stopPrice, decimal limitPrice, DateTime time, string tag, IOrderProperties properties = null)
-            : base(time, (int)OrderResponseErrorCode.UnableToFindOrder, tag)
+        public SubmitOrderRequest(OrderType orderType, SecurityType securityType, Symbol symbol, decimal quantity, decimal stopPrice, decimal limitPrice, DateTime time, string tag, IOrderProperties properties = null, bool whatIf = false)
+            : base(time, (int)OrderResponseErrorCode.UnableToFindOrder, tag, whatIf)
         {
             SecurityType = securityType;
             Symbol = symbol;

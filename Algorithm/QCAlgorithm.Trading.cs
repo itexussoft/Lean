@@ -214,12 +214,7 @@ namespace QuantConnect.Algorithm
             //    return mooTicket;
             //}
 
-            var request = CreateSubmitOrderRequest(OrderType.Market, security, quantity, tag, DefaultOrderProperties?.Clone());
-
-            if (whatIf)
-            {
-                request.WhatIf = true;
-            }
+            var request = CreateSubmitOrderRequest(OrderType.Market, security, quantity, tag, DefaultOrderProperties?.Clone(), whatIf: whatIf);
 
             // If warming up, do not submit
             if (IsWarmingUp)
@@ -1067,9 +1062,9 @@ namespace QuantConnect.Algorithm
             return exchangeHours.IsOpen(time, false);
         }
 
-        private SubmitOrderRequest CreateSubmitOrderRequest(OrderType orderType, Security security, decimal quantity, string tag, IOrderProperties properties, decimal stopPrice = 0m, decimal limitPrice = 0m)
+        private SubmitOrderRequest CreateSubmitOrderRequest(OrderType orderType, Security security, decimal quantity, string tag, IOrderProperties properties, decimal stopPrice = 0m, decimal limitPrice = 0m, bool whatIf = false)
         {
-            return new SubmitOrderRequest(orderType, security.Type, security.Symbol, quantity, stopPrice, limitPrice, UtcTime, tag, properties);
+            return new SubmitOrderRequest(orderType, security.Type, security.Symbol, quantity, stopPrice, limitPrice, UtcTime, tag, properties, whatIf);
         }
     }
 }

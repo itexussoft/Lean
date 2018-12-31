@@ -79,13 +79,14 @@ namespace QuantConnect.Orders
         /// <param name="time">The time this request was created</param>
         /// <param name="orderId">The order id this request acts on, specify zero for <see cref="SubmitOrderRequest"/></param>
         /// <param name="tag">A custom tag for the request</param>
-        protected OrderRequest(DateTime time, int orderId, string tag)
+        protected OrderRequest(DateTime time, int orderId, string tag, bool whatIf = false)
         {
             Time = time;
             OrderId = orderId;
             Tag = tag;
             Response = OrderResponse.Unprocessed;
             Status = OrderRequestStatus.Unprocessed;
+            WhatIf = whatIf;
         }
 
         /// <summary>
