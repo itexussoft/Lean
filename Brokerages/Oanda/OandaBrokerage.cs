@@ -181,7 +181,7 @@ namespace QuantConnect.Brokerages.Oanda
         /// </summary>
         /// <param name="request">The historical data request</param>
         /// <returns>An enumerable of bars covering the span specified in the request</returns>
-        public override IEnumerable<BaseData> GetHistory(HistoryRequest request)
+        public override IEnumerable<BaseData> GetHistory(HistoryRequest request, int timeOut = 90)
         {
             if (!_symbolMapper.IsKnownLeanSymbol(request.Symbol))
             {

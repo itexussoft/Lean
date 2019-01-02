@@ -222,7 +222,7 @@ namespace QuantConnect.Brokerages
         /// </summary>
         /// <param name="request">The historical data request</param>
         /// <returns>An enumerable of bars covering the span specified in the request</returns>
-        public virtual IEnumerable<BaseData> GetHistory(HistoryRequest request)
+        public virtual IEnumerable<BaseData> GetHistory(HistoryRequest request, int timeOut = 90)
         {
             return Enumerable.Empty<BaseData>();
         }

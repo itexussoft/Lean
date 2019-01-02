@@ -166,7 +166,7 @@ namespace QuantConnect.Tests.Engine.Setup
         }
 
         public bool AccountInstantlyUpdated { get; }
-        public IEnumerable<BaseData> GetHistory(HistoryRequest request)
+        public IEnumerable<BaseData> GetHistory(HistoryRequest request, int timeOut = 90)
         {
             throw new NotImplementedException();
         }
