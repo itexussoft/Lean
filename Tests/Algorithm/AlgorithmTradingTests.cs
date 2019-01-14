@@ -1126,9 +1126,9 @@ namespace QuantConnect.Tests.Algorithm
             algo.Order(Symbols.MSFT, 1.0f);
 
             algo.MarketOrder(Symbols.MSFT, 1);
-            algo.MarketOrder(Symbols.MSFT, 1.0);
+            //algo.MarketOrder(Symbols.MSFT, 1.0);
             algo.MarketOrder(Symbols.MSFT, 1.0m);
-            algo.MarketOrder(Symbols.MSFT, 1.0f);
+            //algo.MarketOrder(Symbols.MSFT, 1.0f);
 
             algo.MarketOnOpenOrder(Symbols.MSFT, 1);
             algo.MarketOnOpenOrder(Symbols.MSFT, 1.0);
