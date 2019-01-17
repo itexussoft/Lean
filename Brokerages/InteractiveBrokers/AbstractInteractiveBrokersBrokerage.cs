@@ -34,8 +34,5 @@
         public abstract void Unsubscribe(LiveNodePacket job, IEnumerable<Symbol> symbols);
         public abstract IEnumerable<Symbol> LookupSymbols(string lookupName, SecurityType securityType, string securityCurrency = null, string securityExchange = null);
         public abstract void ResetGatewayConnection();
-
-        //public static int AdjustQuantity(SecurityType type, int size);
-
     }
 }

@@ -45,7 +45,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     /// </summary>
     public sealed class InteractiveBrokersBrokerage : AbstractInteractiveBrokersBrokerage, IDataQueueHandler, IDataQueueUniverseProvider
     {
-        //public event EventHandler<string> OnConnectionLost;
+        public event EventHandler<string> OnConnectionLost;
 
         // next valid order id for this client
         private int _nextValidId;

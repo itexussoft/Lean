@@ -5,5 +5,6 @@
     public interface IBrokerageClient
     {
         event EventHandler<TickPriceEventArgs> TickPrice;
+        event EventHandler<CommissionReportEventArgs> CommissionReport;
     }
 }
