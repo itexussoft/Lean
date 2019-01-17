@@ -10,11 +10,12 @@
     {
         public event EventHandler<string> OnConnectionLost;
 
-        private readonly IB.IBrokerageClient _client;
+        private IB.IBrokerageClient _client;
 
         public IB.IBrokerageClient Client
         {
             get { return _client; }
+            protected set { _client = value; }
         }
 
         public AbstractInteractiveBrokersBrokerage(string name)
