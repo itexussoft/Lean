@@ -43,9 +43,9 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     /// <summary>
     /// The Interactive Brokers brokerage
     /// </summary>
-    public sealed class InteractiveBrokersBrokerage : Brokerage, IDataQueueHandler, IDataQueueUniverseProvider
+    public sealed class InteractiveBrokersBrokerage : AbstractInteractiveBrokersBrokerage, IDataQueueHandler, IDataQueueUniverseProvider
     {
-        public event EventHandler<string> OnConnectionLost;
+        //public event EventHandler<string> OnConnectionLost;
 
         // next valid order id for this client
         private int _nextValidId;
@@ -282,7 +282,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             get { return _client; }
         }
 
-        public void SetDateTimeFunctions(Func<DateTime> estNow, Func<TimeSpan, bool> isGatewayClosableTime)
+        public override void SetDateTimeFunctions(Func<DateTime> estNow, Func<TimeSpan, bool> isGatewayClosableTime)
         {
             this.estNow = estNow;
             this.isGatewayClosableTime = isGatewayClosableTime;
@@ -444,7 +444,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return holdings;
         }
 
-        public List<Holding> GetAllAccountHoldings()
+        public override List<Holding> GetAllAccountHoldings()
         {
             CheckIbGateway();
 
@@ -483,12 +483,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return holdings;
         }
 
-        public Dictionary<string, string> GetAccountSummary()
+        public override Dictionary<string, string> GetAccountSummary()
         {
             return this.GetAccountSummary(AccountSummaryTags.GetAllTags());
         }
 
-        public Dictionary<string, string> GetAccountSummary(string tag)
+        public override Dictionary<string, string> GetAccountSummary(string tag)
         {
             var requestId = GetNextRequestId();
             var manualResetEvent = new ManualResetEvent(false);
@@ -552,7 +552,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return _accountData.CashBalances.Select(x => new Cash(x.Key, x.Value, GetUsdConversion(x.Key))).ToList();
         }
 
-        public string GetPrevDayELV()
+        public override string GetPrevDayELV()
         {
             CheckIbGateway();
 
@@ -569,7 +569,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// Gets the execution details matching the filter
         /// </summary>
         /// <returns>A list of executions matching the filter</returns>
-        public List<IB.ExecutionDetailsEventArgs> GetExecutions(string symbol, string type, string exchange, DateTime? timeSince, string side)
+        public override List<IB.ExecutionDetailsEventArgs> GetExecutions(string symbol, string type, string exchange, DateTime? timeSince, string side)
         {
             var filter = new ExecutionFilter
             {
@@ -1360,7 +1360,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <summary>
         /// Restarts the IB Gateway and restores the connection
         /// </summary>
-        public void ResetGatewayConnection()
+        public override void ResetGatewayConnection()
         {
             _disconnected1100Fired = false;
 
@@ -1552,7 +1552,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             Log.Trace("InteractiveBrokersBrokerage.HandleOpenOrderEnd()");
         }
 
-        public void ProcessExecutionDetailsQueue()
+        public override void ProcessExecutionDetailsQueue()
         {
             foreach (var executionDetailsEventArgs in _executionDetailsQueue.GetConsumingEnumerable())
             {
@@ -2272,7 +2272,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// IDataQueueHandler interface implementation
         /// </summary>
         ///
-        public IEnumerable<BaseData> GetNextTicks()
+        public override IEnumerable<BaseData> GetNextTicks()
         {
             Tick[] ticks;
 
@@ -2295,7 +2295,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
         }
 
-        public Symbol GetSubscribedSymbol(int tickerId)
+        public override Symbol GetSubscribedSymbol(int tickerId)
         {
             //Don't lock this!!!
             return _subscribedTickets[tickerId];
@@ -2306,7 +2306,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         /// <param name="job">Job we're subscribing for:</param>
         /// <param name="symbols">The symbols to be added keyed by SecurityType</param>
-        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols)
+        public override void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols)
         {
             try
             {
@@ -2369,7 +2369,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         /// <param name="job">Job we're processing.</param>
         /// <param name="symbols">The symbols to be removed keyed by SecurityType</param>
-        public void Unsubscribe(LiveNodePacket job, IEnumerable<Symbol> symbols)
+        public override void Unsubscribe(LiveNodePacket job, IEnumerable<Symbol> symbols)
         {
             try
             {
@@ -2610,7 +2610,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <param name="securityCurrency">Expected security currency(if any)</param>
         /// <param name="securityExchange">Expected security exchange name(if any)</param>
         /// <returns></returns>
-        public IEnumerable<Symbol> LookupSymbols(string lookupName, SecurityType securityType, string securityCurrency = null, string securityExchange = null)
+        public override IEnumerable<Symbol> LookupSymbols(string lookupName, SecurityType securityType, string securityCurrency = null, string securityExchange = null)
         {
             // connect will throw if it fails
             Connect();
