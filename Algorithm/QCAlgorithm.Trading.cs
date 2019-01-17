@@ -337,9 +337,14 @@ namespace QuantConnect.Algorithm
         /// <param name="limitPrice">Limit price to fill this order</param>
         /// <param name="tag">String tag for the order (optional)</param>
         /// <returns>Order id</returns>
-        public OrderTicket LimitOrder(Symbol symbol, int quantity, decimal limitPrice, string tag = "")
+        public OrderTicket LimitOrder(Symbol symbol, int quantity, decimal limitPrice, string tag = "", bool whatIf = false)
         {
-            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag);
+            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag, whatIf);
+        }
+
+        public OrderTicket LimitOrderWhatIf(Symbol symbol, int quantity, bool whatIf, decimal limitPrice, string tag = "")
+        {
+            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag, whatIf);
         }
 
         /// <summary>
@@ -350,9 +355,9 @@ namespace QuantConnect.Algorithm
         /// <param name="limitPrice">Limit price to fill this order</param>
         /// <param name="tag">String tag for the order (optional)</param>
         /// <returns>Order id</returns>
-        public OrderTicket LimitOrder(Symbol symbol, double quantity, decimal limitPrice, string tag = "")
+        public OrderTicket LimitOrder(Symbol symbol, double quantity, decimal limitPrice, string tag = "", bool whatIf=false)
         {
-            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag);
+            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag, whatIf);
         }
 
         /// <summary>
@@ -363,10 +368,10 @@ namespace QuantConnect.Algorithm
         /// <param name="limitPrice">Limit price to fill this order</param>
         /// <param name="tag">String tag for the order (optional)</param>
         /// <returns>Order id</returns>
-        public OrderTicket LimitOrder(Symbol symbol, decimal quantity, decimal limitPrice, string tag = "")
+        public OrderTicket LimitOrder(Symbol symbol, decimal quantity, decimal limitPrice, string tag = "", bool whatIf = false)
         {
             var security = Securities[symbol];
-            var request = CreateSubmitOrderRequest(OrderType.Limit, security, quantity, tag, limitPrice: limitPrice, properties: DefaultOrderProperties?.Clone());
+            var request = CreateSubmitOrderRequest(OrderType.Limit, security, quantity, tag, whatIf: whatIf, limitPrice: limitPrice, properties: DefaultOrderProperties?.Clone());
             var response = PreOrderChecks(request);
             if (response.IsError)
             {

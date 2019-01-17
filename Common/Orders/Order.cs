@@ -294,16 +294,21 @@ namespace QuantConnect.Orders
                     if (request.WhatIf)
                     {
                         order = new MarketOrder(request.Symbol, request.Quantity, request.Time, true, request.Tag, request.OrderProperties);
-                        Logging.Log.Trace($"Must be true:  order.WhatIf: { order.WhatIf}");
                     }
                     else
                     {
                         order = new MarketOrder(request.Symbol, request.Quantity, request.Time, request.Tag, request.OrderProperties);
-                        Logging.Log.Trace($"Must be false:  order.WhatIf: { order.WhatIf}");
                     }
                     break;
                 case OrderType.Limit:
-                    order = new LimitOrder(request.Symbol, request.Quantity, request.LimitPrice, request.Time, request.Tag, request.OrderProperties);
+                    if (request.WhatIf)
+                    {
+                        order = new LimitOrder(request.Symbol, request.Quantity, request.LimitPrice, request.Time, true, request.Tag, request.OrderProperties);
+                    }
+                    else
+                    {
+                        order = new LimitOrder(request.Symbol, request.Quantity, request.LimitPrice, request.Time, request.Tag, request.OrderProperties);
+                    }
                     break;
                 case OrderType.StopMarket:
                     order = new StopMarketOrder(request.Symbol, request.Quantity, request.StopPrice, request.Time, request.Tag, request.OrderProperties);
