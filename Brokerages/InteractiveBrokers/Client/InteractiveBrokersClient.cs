@@ -771,6 +771,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="commissionReport">The structure that contains commission details.</param>
         public void commissionReport(CommissionReport commissionReport)
         {
+            Logging.Log.Trace($"commissionReport: {commissionReport?.ToString()}, {commissionReport?.Commission}, {commissionReport?.Currency}, {commissionReport?.ExecId}, {commissionReport.RealizedPNL}, {commissionReport?.Yield}, {commissionReport?.YieldRedemptionDate}");
             OnCommissionReport(new CommissionReportEventArgs(commissionReport));
         }
 
@@ -1504,10 +1505,16 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         }
 
         /// <summary>
-        /// CommissionReport event invocator
+        /// CommissionReport event invocator    
         /// </summary>
         protected virtual void OnCommissionReport(CommissionReportEventArgs e)
         {
+            try
+            {
+                Logging.Log.Trace($"OnCommissionReport: {CommissionReport?.GetInvocationList().Length}");
+                Logging.Log.Trace($"e: {e?.CommissionReport?.ToString()}");
+            }
+            catch { }
             CommissionReport?.Invoke(this, e);
         }
 
