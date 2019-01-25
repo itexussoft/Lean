@@ -367,6 +367,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <returns>The open orders returned from IB</returns>
         public override List<Order> GetOpenOrders()
         {
+            Log.Trace("InteractiveBrokersBrokerage.GetOpenOrders() was invoked");
+
             var orders = new List<Order>();
 
             var manualResetEvent = new ManualResetEvent(false);
@@ -409,6 +411,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             CheckIbGateway();
 
+            Log.Trace("InteractiveBrokersBrokerage.GetAccountHoldings() was invoked");
+
             if (!IsConnected)
             {
                 Log.Trace("InteractiveBrokersBrokerage.GetAccountHoldings(): not connected, connecting now");
@@ -446,6 +450,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
         public List<Holding> GetAllAccountHoldings()
         {
+            Log.Trace("InteractiveBrokersBrokerage.GetAccountHoldings() was invoked");
             CheckIbGateway();
 
             if (!IsConnected)
@@ -485,11 +490,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
         public Dictionary<string, string> GetAccountSummary()
         {
+            Log.Trace($"InteractiveBrokersBrokerage.GetAccountSummary() was invoked");
             return this.GetAccountSummary(AccountSummaryTags.GetAllTags());
         }
 
         public Dictionary<string, string> GetAccountSummary(string tag)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.GetAccountSummary() with tags");
             var requestId = GetNextRequestId();
             var manualResetEvent = new ManualResetEvent(false);
             var result = new Dictionary<string, string>();
@@ -554,6 +561,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
         public string GetPrevDayELV()
         {
+            Log.Trace("InteractiveBrokersBrokerage.GetPrevDayELV()");
             CheckIbGateway();
 
             if (!IsConnected)
@@ -571,6 +579,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <returns>A list of executions matching the filter</returns>
         public List<IB.ExecutionDetailsEventArgs> GetExecutions(string symbol, string type, string exchange, DateTime? timeSince, string side)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.GetExecutions() was invoked, symbol: {symbol}, type: {type}");
             var filter = new ExecutionFilter
             {
                 AcctCode = _account,
@@ -1453,6 +1462,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         private void HandleUpdateAccountValue(object sender, IB.UpdateAccountValueEventArgs e)
         {
+            Log.Trace("InteractiveBrokersBrokerage.HandleUpdateAccountValue() was invoked");
             try
             {
                 _accountData.AccountProperties[e.Currency + ":" + e.Key] = e.Value;
@@ -1554,8 +1564,10 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
         public void ProcessExecutionDetailsQueue()
         {
+            Log.Trace($"InteractiveBrokersBrokerage.ProcessExecutionDetailsQueue() was invoked");
             foreach (var executionDetailsEventArgs in _executionDetailsQueue.GetConsumingEnumerable())
             {
+                Log.Trace($"InteractiveBrokersBrokerage.executionDetailsEventArgs in ProcessExecutionDetailsQueue: {executionDetailsEventArgs}");
                 this.ProcessExecutionDetails(executionDetailsEventArgs);
             }
         }
@@ -1676,6 +1688,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         private void HandlePortfolioUpdates(object sender, IB.UpdatePortfolioEventArgs e)
         {
+            Log.Trace("InteractiveBrokersBrokerage.HandlePortfolioUpdates() was invoked");
             _accountHoldingsResetEvent.Reset();
             var holding = CreateHolding(e);
             _accountData.AccountHoldings[holding.Symbol.Value] = holding;
@@ -2274,6 +2287,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         ///
         public IEnumerable<BaseData> GetNextTicks()
         {
+            Log.Trace($"InteractiveBrokersBrokerage.GetNextTicks() was invoked");
+
             Tick[] ticks;
 
             lock (_ticks)
@@ -2669,6 +2684,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <remarks>For IB history limitations see https://www.interactivebrokers.com/en/software/api/apiguide/tables/historical_data_limitations.htm </remarks>
         public override IEnumerable<BaseData> GetHistory(HistoryRequest request)
         {
+            Log.Trace("InteractiveBrokersBrokerage.GetHistory() was invoked");
             // skipping universe and canonical symbols
             if (!CanSubscribe(request.Symbol) ||
                 (request.Symbol.ID.SecurityType == SecurityType.Option && request.Symbol.IsCanonical()) ||
