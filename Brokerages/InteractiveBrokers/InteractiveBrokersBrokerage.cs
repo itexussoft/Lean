@@ -934,6 +934,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             {
                 var ibOrder = ConvertOrder(order, contract, ibOrderId);
                 _client.ClientSocket.placeOrder(ibOrder.OrderId, contract, ibOrder);
+                Log.Trace($"ibOrder: {ibOrder.WhatIf}");
             }
         }
 
@@ -1699,7 +1700,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 AllOrNone = false,
                 Tif = IB.TimeInForce.GoodTillCancel,
                 Transmit = true,
-                Rule80A = _agentDescription
+                Rule80A = _agentDescription,
+                WhatIf = order.WhatIf,
             };
 
             if (order.Type == OrderType.MarketOnOpen)

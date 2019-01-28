@@ -65,6 +65,18 @@ namespace QuantConnect.Orders
             }
         }
 
+        public LimitOrder(Symbol symbol, decimal quantity, decimal limitPrice, DateTime time, bool whatIf, string tag = "", IOrderProperties properties = null)
+            : base(symbol, quantity, time, whatIf, tag, properties)
+        {
+            LimitPrice = limitPrice;
+
+            if (tag == "")
+            {
+                //Default tag values to display limit price in GUI.
+                Tag = "Limit Price: " + limitPrice.ToString("C");
+            }
+        }
+
         /// <summary>
         /// Gets the order value in units of the security's quote currency
         /// </summary>
@@ -74,13 +86,13 @@ namespace QuantConnect.Orders
             // selling, so higher price will be used
             if (Quantity < 0)
             {
-                return Quantity*Math.Max(LimitPrice, security.Price);
+                return Quantity * Math.Max(LimitPrice, security.Price);
             }
 
             // buying, so lower price will be used
             if (Quantity > 0)
             {
-                return Quantity*Math.Min(LimitPrice, security.Price);
+                return Quantity * Math.Min(LimitPrice, security.Price);
             }
 
             return 0m;
@@ -117,7 +129,7 @@ namespace QuantConnect.Orders
         /// <returns>A copy of this order</returns>
         public override Order Clone()
         {
-            var order = new LimitOrder {LimitPrice = LimitPrice};
+            var order = new LimitOrder { LimitPrice = LimitPrice };
             CopyTo(order);
             return order;
         }

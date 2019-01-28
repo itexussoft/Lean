@@ -182,9 +182,9 @@ namespace QuantConnect.Algorithm
         /// <param name="asynchronous">Send the order asynchrously (false). Otherwise we'll block until it fills</param>
         /// <param name="tag">Place a custom order property or tag (e.g. indicator data).</param>
         /// <returns>int Order id</returns>
-        public OrderTicket MarketOrder(Symbol symbol, double quantity, bool asynchronous = false, string tag = "")
+        public OrderTicket MarketOrderWhatIf(Symbol symbol, double quantity, bool whatIf = false, bool asynchronous = false, string tag = "")
         {
-            return MarketOrder(symbol, (decimal)quantity, asynchronous, tag);
+            return MarketOrder(symbol, (decimal)quantity, asynchronous, tag, whatIf);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace QuantConnect.Algorithm
         /// <param name="asynchronous">Send the order asynchrously (false). Otherwise we'll block until it fills</param>
         /// <param name="tag">Place a custom order property or tag (e.g. indicator data).</param>
         /// <returns>int Order id</returns>
-        public OrderTicket MarketOrder(Symbol symbol, decimal quantity, bool asynchronous = false, string tag = "")
+        public OrderTicket MarketOrder(Symbol symbol, decimal quantity, bool asynchronous = false, string tag = "", bool whatIf = false)
         {
             var security = Securities[symbol];
 
@@ -214,7 +214,7 @@ namespace QuantConnect.Algorithm
             //    return mooTicket;
             //}
 
-            var request = CreateSubmitOrderRequest(OrderType.Market, security, quantity, tag, DefaultOrderProperties?.Clone());
+            var request = CreateSubmitOrderRequest(OrderType.Market, security, quantity, tag, DefaultOrderProperties?.Clone(), whatIf: whatIf);
 
             // If warming up, do not submit
             if (IsWarmingUp)
@@ -337,9 +337,14 @@ namespace QuantConnect.Algorithm
         /// <param name="limitPrice">Limit price to fill this order</param>
         /// <param name="tag">String tag for the order (optional)</param>
         /// <returns>Order id</returns>
-        public OrderTicket LimitOrder(Symbol symbol, int quantity, decimal limitPrice, string tag = "")
+        public OrderTicket LimitOrder(Symbol symbol, int quantity, decimal limitPrice, string tag = "", bool whatIf = false)
         {
-            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag);
+            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag, whatIf);
+        }
+
+        public OrderTicket LimitOrderWhatIf(Symbol symbol, int quantity, bool whatIf, decimal limitPrice, string tag = "")
+        {
+            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag, whatIf);
         }
 
         /// <summary>
@@ -350,9 +355,9 @@ namespace QuantConnect.Algorithm
         /// <param name="limitPrice">Limit price to fill this order</param>
         /// <param name="tag">String tag for the order (optional)</param>
         /// <returns>Order id</returns>
-        public OrderTicket LimitOrder(Symbol symbol, double quantity, decimal limitPrice, string tag = "")
+        public OrderTicket LimitOrder(Symbol symbol, double quantity, decimal limitPrice, string tag = "", bool whatIf=false)
         {
-            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag);
+            return LimitOrder(symbol, (decimal)quantity, limitPrice, tag, whatIf);
         }
 
         /// <summary>
@@ -363,10 +368,10 @@ namespace QuantConnect.Algorithm
         /// <param name="limitPrice">Limit price to fill this order</param>
         /// <param name="tag">String tag for the order (optional)</param>
         /// <returns>Order id</returns>
-        public OrderTicket LimitOrder(Symbol symbol, decimal quantity, decimal limitPrice, string tag = "")
+        public OrderTicket LimitOrder(Symbol symbol, decimal quantity, decimal limitPrice, string tag = "", bool whatIf = false)
         {
             var security = Securities[symbol];
-            var request = CreateSubmitOrderRequest(OrderType.Limit, security, quantity, tag, limitPrice: limitPrice, properties: DefaultOrderProperties?.Clone());
+            var request = CreateSubmitOrderRequest(OrderType.Limit, security, quantity, tag, whatIf: whatIf, limitPrice: limitPrice, properties: DefaultOrderProperties?.Clone());
             var response = PreOrderChecks(request);
             if (response.IsError)
             {
@@ -1062,9 +1067,9 @@ namespace QuantConnect.Algorithm
             return exchangeHours.IsOpen(time, false);
         }
 
-        private SubmitOrderRequest CreateSubmitOrderRequest(OrderType orderType, Security security, decimal quantity, string tag, IOrderProperties properties, decimal stopPrice = 0m, decimal limitPrice = 0m)
+        private SubmitOrderRequest CreateSubmitOrderRequest(OrderType orderType, Security security, decimal quantity, string tag, IOrderProperties properties, decimal stopPrice = 0m, decimal limitPrice = 0m, bool whatIf = false)
         {
-            return new SubmitOrderRequest(orderType, security.Type, security.Symbol, quantity, stopPrice, limitPrice, UtcTime, tag, properties);
+            return new SubmitOrderRequest(orderType, security.Type, security.Symbol, quantity, stopPrice, limitPrice, UtcTime, tag, properties, whatIf);
         }
     }
 }

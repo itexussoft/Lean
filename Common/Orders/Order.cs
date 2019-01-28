@@ -183,6 +183,23 @@ namespace QuantConnect.Orders
             Properties = properties;
         }
 
+        protected Order(Symbol symbol, decimal quantity, DateTime time, bool whatIf, string tag = "", IOrderProperties properties = null)
+        {
+            Time = time;
+            Price = 0;
+            PriceCurrency = string.Empty;
+            Quantity = quantity;
+            Symbol = symbol;
+            Status = OrderStatus.None;
+            Tag = tag;
+            Duration = OrderDuration.GTC;
+            BrokerId = new List<string>();
+            ContingentId = 0;
+            DurationValue = DateTime.MaxValue;
+            Properties = properties;
+            WhatIf = whatIf;
+        }
+
         /// <summary>
         /// Gets the value of this order at the given market price in units of the account currency
         /// NOTE: Some order types derive value from other parameters, such as limit prices
@@ -192,7 +209,7 @@ namespace QuantConnect.Orders
         public decimal GetValue(Security security)
         {
             var value = GetValueImpl(security);
-            return value*security.QuoteCurrency.ConversionRate*security.SymbolProperties.ContractMultiplier;
+            return value * security.QuoteCurrency.ConversionRate * security.SymbolProperties.ContractMultiplier;
         }
 
         /// <summary>
@@ -259,6 +276,7 @@ namespace QuantConnect.Orders
             order.Symbol = Symbol;
             order.Tag = Tag;
             order.Properties = Properties?.Clone();
+            order.WhatIf = WhatIf;
         }
 
         /// <summary>
@@ -272,10 +290,25 @@ namespace QuantConnect.Orders
             switch (request.OrderType)
             {
                 case OrderType.Market:
-                    order = new MarketOrder(request.Symbol, request.Quantity, request.Time, request.Tag, request.OrderProperties);
+                    Logging.Log.Trace($"Market:  request.WhatIf: { request.WhatIf}");
+                    if (request.WhatIf)
+                    {
+                        order = new MarketOrder(request.Symbol, request.Quantity, request.Time, true, request.Tag, request.OrderProperties);
+                    }
+                    else
+                    {
+                        order = new MarketOrder(request.Symbol, request.Quantity, request.Time, request.Tag, request.OrderProperties);
+                    }
                     break;
                 case OrderType.Limit:
-                    order = new LimitOrder(request.Symbol, request.Quantity, request.LimitPrice, request.Time, request.Tag, request.OrderProperties);
+                    if (request.WhatIf)
+                    {
+                        order = new LimitOrder(request.Symbol, request.Quantity, request.LimitPrice, request.Time, true, request.Tag, request.OrderProperties);
+                    }
+                    else
+                    {
+                        order = new LimitOrder(request.Symbol, request.Quantity, request.LimitPrice, request.Time, request.Tag, request.OrderProperties);
+                    }
                     break;
                 case OrderType.StopMarket:
                     order = new StopMarketOrder(request.Symbol, request.Quantity, request.StopPrice, request.Time, request.Tag, request.OrderProperties);
@@ -303,6 +336,8 @@ namespace QuantConnect.Orders
             }
             return order;
         }
+
+        public bool WhatIf { get; set; }
 
         /// <summary>
         /// Order Expiry on a specific UTC time.

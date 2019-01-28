@@ -52,13 +52,18 @@ namespace QuantConnect.Orders
         {
         }
 
+        public MarketOrder(Symbol symbol, decimal quantity, DateTime time, bool whatIf, string tag = "", IOrderProperties properties = null)
+            : base(symbol, quantity, time, whatIf, tag, properties)
+        {
+        }
+
         /// <summary>
         /// Gets the order value in units of the security's quote currency
         /// </summary>
         /// <param name="security">The security matching this order's symbol</param>
         protected override decimal GetValueImpl(Security security)
         {
-            return Quantity*security.Price;
+            return Quantity * security.Price;
         }
 
         /// <summary>
