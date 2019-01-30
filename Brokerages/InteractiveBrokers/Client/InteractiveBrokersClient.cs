@@ -480,7 +480,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="attribs">Tick attributes.</param>
         public void tickPrice(int tickerId, int field, double price, TickAttrib attribs)
         {
-            Log.Trace($"InteractiveBrokersClient.tickPrice() tickerId: {tickerId}, field: {field}, price: {price}, attribs.CanAutoExecute: {attribs.CanAutoExecute}, attribs.PastLimit: {attribs.PastLimit}");
+            //Log.Trace($"InteractiveBrokersClient.tickPrice() tickerId: {tickerId}, field: {field}, price: {price}, attribs.CanAutoExecute: {attribs.CanAutoExecute}, attribs.PastLimit: {attribs.PastLimit}");
             OnTickPrice(new TickPriceEventArgs(tickerId, field, price, attribs));
         }
 
@@ -492,7 +492,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="size">The actual size.</param>
         public void tickSize(int tickerId, int field, int size)
         {
-            Log.Trace($"InteractiveBrokersClient.tickSize() tickerId: {tickerId}, field: {field}, size: {size}");
+            //Log.Trace($"InteractiveBrokersClient.tickSize() tickerId: {tickerId}, field: {field}, size: {size}");
             OnTickSize(new TickSizeEventArgs(tickerId, field, size));
         }
 
@@ -504,7 +504,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="value">The value of the specified field.</param>
         public void tickString(int tickerId, int field, string value)
         {
-            Log.Trace($"InteractiveBrokersClient.tickString() tickerId: {tickerId}, field: {field}, value: {value}");
+            //Log.Trace($"InteractiveBrokersClient.tickString() tickerId: {tickerId}, field: {field}, value: {value}");
             OnTickString(new TickStringEventArgs(tickerId, field, value));
         }
 
@@ -516,7 +516,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="value">The value of the specified field.</param>
         public void tickGeneric(int tickerId, int field, double value)
         {
-            Log.Trace($"InteractiveBrokersClient.tickGeneric() tickerId: {tickerId}, field: {field}, value: {value}");
+            //Log.Trace($"InteractiveBrokersClient.tickGeneric() tickerId: {tickerId}, field: {field}, value: {value}");
             OnTickGeneric(new TickGenericEventArgs(tickerId, field, value));
         }
 
