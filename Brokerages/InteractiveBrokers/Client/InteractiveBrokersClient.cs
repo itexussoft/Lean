@@ -535,8 +535,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         public void tickEFP(int tickerId, int tickType, double basisPoints, string formattedBasisPoints, double impliedFuture, int holdDays,
             string futureExpiry, double dividendImpact, double dividendsToExpiry)
         {
-            Log.Trace($"InteractiveBrokersClient.tickEFP() tickerId: {tickerId}, tickType: {tickType}, basisPoints: {basisPoints}, formattedBasisPoints: {formattedBasisPoints}, impliedFuture: {impliedFuture}, " +
-                $"holdDays: {holdDays}, futureExpiry: {futureExpiry}, dividendImpact: {dividendImpact}, dividendsToExpiry: {dividendsToExpiry}");
+            //Log.Trace($"InteractiveBrokersClient.tickEFP() tickerId: {tickerId}, tickType: {tickType}, basisPoints: {basisPoints}, formattedBasisPoints: {formattedBasisPoints}, impliedFuture: {impliedFuture}, " +
+                //$"holdDays: {holdDays}, futureExpiry: {futureExpiry}, dividendImpact: {dividendImpact}, dividendsToExpiry: {dividendsToExpiry}");
             OnTickEfp(new TickEfpEventArgs(tickerId, tickType, basisPoints, formattedBasisPoints, impliedFuture, holdDays, futureExpiry, dividendImpact,
                 dividendsToExpiry));
         }
@@ -550,7 +550,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="underComp">Underlying component.</param>
         public void deltaNeutralValidation(int reqId, UnderComp underComp)
         {
-            Log.Trace($"InteractiveBrokersClient.deltaNeutralValidation() reqId: {reqId}, underComp.ConId: {underComp.ConId}, underComp.Delta: {underComp.Delta}, underComp.Price: {underComp.Price}");
+            //Log.Trace($"InteractiveBrokersClient.deltaNeutralValidation() reqId: {reqId}, underComp.ConId: {underComp.ConId}, underComp.Delta: {underComp.Delta}, underComp.Price: {underComp.Price}");
             OnDeltaNeutralValidation(new DeltaNeutralValidationEventArgs(reqId, underComp));
         }
 
@@ -571,8 +571,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         public void tickOptionComputation(int tickerId, int field, double impliedVolatility, double delta, double optPrice, double pvDividend,
             double gamma, double vega, double theta, double undPrice)
         {
-            Log.Trace($"InteractiveBrokersClient.tickOptionComputation() tickerId: {tickerId}, field: {field}, impliedVolatility: {impliedVolatility}, delta: {delta}, " +
-                $"optPrice: {optPrice}, pvDividend: {pvDividend}, gamma: {gamma}, vega: {vega}, theta: {theta}, undPrice: {undPrice}");
+            //Log.Trace($"InteractiveBrokersClient.tickOptionComputation() tickerId: {tickerId}, field: {field}, impliedVolatility: {impliedVolatility}, delta: {delta}, " +
+                //$"optPrice: {optPrice}, pvDividend: {pvDividend}, gamma: {gamma}, vega: {vega}, theta: {theta}, undPrice: {undPrice}");
             OnTickOptionComputation(new TickOptionComputationEventArgs(tickerId, field, impliedVolatility, delta, optPrice, pvDividend, gamma, vega, theta,
                 undPrice));
         }
@@ -644,7 +644,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="contract">This structure contains a full description of the bond contract being looked up.</param>
         public void bondContractDetails(int reqId, ContractDetails contract)
         {
-            Log.Trace($"InteractiveBrokersClient.bondContractDetails() reqId: {reqId}, ContractDetails: {JsonConvert.SerializeObject(contract)}");
+            //Log.Trace($"InteractiveBrokersClient.bondContractDetails() reqId: {reqId}, ContractDetails: {JsonConvert.SerializeObject(contract)}");
             OnBondContractDetails(new ContractDetailsEventArgs(reqId, contract));
         }
 
@@ -691,7 +691,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="timestamp">The last update system time.</param>
         public void updateAccountTime(string timestamp)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.updateAccountTime() timestamp:{timestamp}");
+            //Log.Trace($"InteractiveBrokersBrokerage.updateAccountTime() timestamp:{timestamp}");
             OnUpdateAccountTime(new UpdateAccountTimeEventArgs(timestamp));
         }
 
@@ -701,7 +701,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="account">The account ID.</param>
         public void accountDownloadEnd(string account)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.accountDownloadEnd() account:{account}");
+            //Log.Trace($"InteractiveBrokersBrokerage.accountDownloadEnd() account:{account}");
             OnAccountDownloadEnd(new AccountDownloadEndEventArgs(account));
         }
 
@@ -803,7 +803,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="commissionReport">The structure that contains commission details.</param>
         public void commissionReport(CommissionReport commissionReport)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.commissionReport() commissionReport: {JsonConvert.SerializeObject(commissionReport)}");
+            //Log.Trace($"InteractiveBrokersBrokerage.commissionReport() commissionReport: {JsonConvert.SerializeObject(commissionReport)}");
             OnCommissionReport(new CommissionReportEventArgs(commissionReport));
         }
 
@@ -815,7 +815,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="data">One of these XML reports: Company overview,Financial summary,Financial ratios,Financial statements,Analyst estimates,Company calendar</param>
         public void fundamentalData(int reqId, string data)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.fundamentalData() reqId: {reqId}, data: {data}");
+            //Log.Trace($"InteractiveBrokersBrokerage.fundamentalData() reqId: {reqId}, data: {data}");
             OnFundamentalData(new FundamentalDataEventArgs(reqId, data));
         }
 
@@ -862,7 +862,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="marketDataType">1 for real-time streaming market data or 2 for frozen market data.</param>
         public void marketDataType(int reqId, int marketDataType)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.marketDataType() reqId: {reqId}, marketDataType: {marketDataType}");
+            //Log.Trace($"InteractiveBrokersBrokerage.marketDataType() reqId: {reqId}, marketDataType: {marketDataType}");
             OnMarketDataType(new MarketDataTypeEventArgs(reqId, marketDataType));
         }
 
@@ -877,7 +877,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="size">The order size.</param>
         public void updateMktDepth(int tickerId, int position, int operation, int side, double price, int size)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.updateMktDepth() tickerId: {tickerId}, position: {position}, operation: {operation}, side: {side}, price: {price}, size: {size}");
+            //Log.Trace($"InteractiveBrokersBrokerage.updateMktDepth() tickerId: {tickerId}, position: {position}, operation: {operation}, side: {side}, price: {price}, size: {size}");
             OnUpdateMarketDepth(new UpdateMarketDepthEventArgs(tickerId, position, operation, side, price, size));
         }
 
@@ -893,7 +893,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="size">The order size.</param>
         public void updateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.updateMktDepthL2() tickerId: {tickerId}, position: {position}, operation: {operation}, side: {side}, price: {price}, size: {size}");
+            //Log.Trace($"InteractiveBrokersBrokerage.updateMktDepthL2() tickerId: {tickerId}, position: {position}, operation: {operation}, side: {side}, price: {price}, size: {size}");
             OnUpdateMarketDepthLevel2(new UpdateMarketDepthLevel2EventArgs(tickerId, position, marketMaker, operation, side, price, size));
         }
 
@@ -906,7 +906,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="origExchange">The exchange from which this message originated.</param>
         public void updateNewsBulletin(int msgId, int msgType, string message, string origExchange)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.updateNewsBulletin() msgId: {msgId}, msgType: {msgType}, message: {message}, origExchange: {origExchange}");
+            //Log.Trace($"InteractiveBrokersBrokerage.updateNewsBulletin() msgId: {msgId}, msgType: {msgType}, message: {message}, origExchange: {origExchange}");
             OnUpdateNewsBulletin(new UpdateNewsBulletinEventArgs(msgId, msgType, message, origExchange));
         }
 
@@ -919,7 +919,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="avgCost">The average cost of the position.</param>
         public void position(string account, Contract contract, double pos, double avgCost)
         {
-            Log.Trace($"InteractiveBrokersBrokerage.position() account: {account}, contract: {JsonConvert.SerializeObject(contract)}, pos: {pos}, avgCost: {avgCost}");
+            //Log.Trace($"InteractiveBrokersBrokerage.position() account: {account}, contract: {JsonConvert.SerializeObject(contract)}, pos: {pos}, avgCost: {avgCost}");
             var positionValue = Convert.ToInt32(pos);
             OnPosition(new PositionEventArgs(account, contract, positionValue, avgCost));
         }
