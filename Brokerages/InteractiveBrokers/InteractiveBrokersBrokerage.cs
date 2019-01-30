@@ -298,7 +298,10 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             try
             {
                 Log.Trace("InteractiveBrokersBrokerage.PlaceOrder(): Symbol: " + order.Symbol.Value + " Quantity: " + order.Quantity);
-
+                Log.Trace($"InteractiveBrokersBrokerage.PlaceOrder() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
+                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
+                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
+                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
                 IBPlaceOrder(order, true);
                 return true;
             }
@@ -319,6 +322,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             try
             {
                 Log.Trace("InteractiveBrokersBrokerage.UpdateOrder(): Symbol: " + order.Symbol.Value + " Quantity: " + order.Quantity + " Status: " + order.Status);
+                Log.Trace($"InteractiveBrokersBrokerage.UpdateOrder() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
+                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
+                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
+                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
+                IBPlaceOrder(order, true);
 
                 IBPlaceOrder(order, false);
             }
@@ -340,7 +348,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             try
             {
                 Log.Trace("InteractiveBrokersBrokerage.CancelOrder(): Symbol: " + order.Symbol.Value + " Quantity: " + order.Quantity);
-
+                Log.Trace($"InteractiveBrokersBrokerage.CancelOrder() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
+                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
+                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
+                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
+                IBPlaceOrder(order, true);
                 // this could be better
                 foreach (var id in order.BrokerId)
                 {
@@ -400,6 +412,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             _client.OpenOrder -= clientOnOpenOrder;
             _client.OpenOrderEnd -= clientOnOpenOrderEnd;
 
+            foreach (var order in orders)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetOpenOrders() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
+                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
+                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
+                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
+            }
+
             return orders;
         }
 
@@ -445,6 +465,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             Task.WaitAll(tasks, 5000);
 
+            foreach (var holding in holdings)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetAccountHoldings() AveragePrice: {holding.AveragePrice}, ConversionRate: {holding.ConversionRate}, CurrencySymbol: {holding.CurrencySymbol}, " +
+                    $"MarketPrice: {holding.MarketPrice}, MarketValue: {holding.MarketValue}, Quantity: {holding.Quantity}, Symbol: {holding.Symbol.Value}, Type: {holding.Type.ToString()}, " +
+                    $"UnrealizedPnL: {holding.UnrealizedPnL}");
+            }
+
             return holdings;
         }
 
@@ -484,6 +511,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }).Where(x => x != null).ToArray();
 
             Task.WaitAll(tasks, 5000);
+
+            foreach (var holding in holdings)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetAllAccountHoldings() AveragePrice: {holding.AveragePrice}, ConversionRate: {holding.ConversionRate}, CurrencySymbol: {holding.CurrencySymbol}, " +
+                    $"MarketPrice: {holding.MarketPrice}, MarketValue: {holding.MarketValue}, Quantity: {holding.Quantity}, Symbol: {holding.Symbol.Value}, Type: {holding.Type.ToString()}, " +
+                    $"UnrealizedPnL: {holding.UnrealizedPnL}");
+            }
 
             return holdings;
         }
@@ -539,6 +573,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             _client.AccountSummary -= accountSummary;
             _client.AccountSummaryEnd -= accountSummaryEnd;
 
+            foreach (KeyValuePair<string, string> accSum in result)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetAccountSummary() Tag: {accSum.Key}, Value: {accSum.Value}");
+            }
+
             return result;
         }
 
@@ -556,6 +595,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 Connect();
             }
 
+            var result = _accountData.CashBalances.Select(x => new Cash(x.Key, x.Value, GetUsdConversion(x.Key))).ToList();
+
+            foreach (var cash in result)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetCashBalance(): Amount: {cash.Amount}, ConversionRate: {cash.ConversionRate}, SecuritySymbol: {cash.SecuritySymbol.Value}, " +
+                    $"Symbol: {cash.Symbol}, ValueInAccountCurrency: {cash.ValueInAccountCurrency}");
+            }
+
             return _accountData.CashBalances.Select(x => new Cash(x.Key, x.Value, GetUsdConversion(x.Key))).ToList();
         }
 
@@ -569,6 +616,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 Log.Trace("InteractiveBrokersBrokerage.GetCashBalance(): not connected, connecting now");
                 Connect();
             }
+
+            Log.Trace($"InteractiveBrokersBrokerage.GetPrevDayELV() {_accountData.AccountProperties.FirstOrDefault(x => x.Key == "USD:PreviousDayEquityWithLoanValue").Value}");
 
             return _accountData.AccountProperties.FirstOrDefault(x => x.Key == "USD:PreviousDayEquityWithLoanValue").Value;
         }
@@ -623,6 +672,24 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             // remove our event handlers
             _client.ExecutionDetails -= clientOnExecDetails;
             _client.ExecutionDetailsEnd -= clientOnExecutionDataEnd;
+
+            foreach (var ex in details)
+            {
+                Log.Trace($"InteractiveBrokersBrokerage.GetExecutions(): RequestId: {ex.RequestId}, Execution AcctNumber: {ex.Execution.AcctNumber}, AvgPrice: {ex.Execution.AvgPrice}, " +
+                    $"ClientId: {ex.Execution.ClientId}, CumQty: {ex.Execution.CumQty}, EvMultiplier: {ex.Execution.EvMultiplier}, EvRule: {ex.Execution.EvRule}, Exchange: {ex.Execution.Exchange}, " +
+                    $"ExecId: {ex.Execution.ExecId}, Liquidation: {ex.Execution.Liquidation}, ModelCode: {ex.Execution.ModelCode}, OrderId: {ex.Execution.OrderId}, OrderRef: {ex.Execution.OrderRef}, " +
+                    $"PermId: {ex.Execution.PermId}, Price: {ex.Execution.Price}, Shares: {ex.Execution.Shares}, Side: {ex.Execution.Side}, Time: {ex.Execution.Time}");
+                Log.Trace($"InteractiveBrokersBrokerage.GetExecutions(): Contract.ComboLegsDescription: {ex.Contract.ComboLegsDescription}, .ConId: {ex.Contract.ConId}, .Currency: {ex.Contract.Currency}, " +
+                    $".Exchange: {ex.Contract.Exchange}, .IncludeExpired: {ex.Contract.IncludeExpired}, .LastTradeDateOrContractMonth: {ex.Contract.LastTradeDateOrContractMonth}, " +
+                    $".LocalSymbol: {ex.Contract.LocalSymbol}, .Multiplier: {ex.Contract.Multiplier}, .PrimaryExch: {ex.Contract.PrimaryExch}, .Right: {ex.Contract.Right}, .SecId: {ex.Contract.SecId}, " +
+                    $".SecIdType: {ex.Contract.SecIdType}, .SecType: {ex.Contract.SecType}, .Strike: {ex.Contract.Strike}, .Symbol: {ex.Contract.Symbol}, .TradingClass: {ex.Contract.TradingClass}, " +
+                    $".UnderComp: {ex.Contract.UnderComp}");
+                foreach (var cLeg in ex.Contract.ComboLegs)
+                {
+                    Log.Trace($"InteractiveBrokersBrokerage.GetExecutions() ComboLeg: Action:{cLeg.Action}, ConId: {cLeg.ConId}, DesignatedLocation: {cLeg.DesignatedLocation}, " +
+                        $"Exchange: {cLeg.Exchange}, ExemptCode: {cLeg.ExemptCode}, OpenClose: {cLeg.OpenClose}, Ratio: {cLeg.Ratio}, ShortSaleSlot: {cLeg.ShortSaleSlot}");
+                }
+            }
 
             return details;
         }
