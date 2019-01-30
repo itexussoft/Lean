@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using IBApi;
+using Newtonsoft.Json;
 using QuantConnect.Logging;
 
 namespace QuantConnect.Brokerages.InteractiveBrokers.Client
@@ -643,15 +644,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="contract">This structure contains a full description of the bond contract being looked up.</param>
         public void bondContractDetails(int reqId, ContractDetails contract)
         {
-            Log.Trace($"InteractiveBrokersClient.bondContractDetails() reqId: {reqId}, Contract.AggGroup: {contract.AggGroup}, .BondType: {contract.BondType}, .Callable: {contract.Callable}, " +
-                $".Category: {contract.Category}, .ContractMonth: {contract.ContractMonth}, .Convertible: {contract.Convertible}, .Coupon: {contract.Coupon}, .CouponType: {contract.CouponType}, " +
-                $".Cusip: {contract.Cusip}, .DescAppend: {contract.DescAppend}, .EvMultiplier: {contract.EvMultiplier}, .EvRule: {contract.EvRule}, .Industry: {contract.Industry}, " +
-                $".IssueDate: {contract.IssueDate}, .LiquidHours: {contract.LiquidHours}, .LongName: {contract.LongName}, .MarketName: {contract.MarketName}, .MarketRuleIds: {contract.MarketRuleIds}, " +
-                $".Maturity: {contract.Maturity}, .MdSizeMultiplier: {contract.MdSizeMultiplier}, .MinTick: {contract.MinTick}, .NextOptionDate: {contract.NextOptionDate}, " +
-                $".NextOptionPartial: {contract.NextOptionPartial}, .NextOptionType: {contract.NextOptionType}, .Notes: {contract.Notes}, .OrderTypes: {contract.OrderTypes}, " +
-                $".PriceMagnifier: {contract.PriceMagnifier}, .Putable: {contract.Putable}, .Ratings: {contract.Ratings}, .SecIdList: {contract.SecIdList}, .Subcategory: {contract.Subcategory}" +
-                $".Summary: {contract.Summary}, .TimeZoneId: {contract.TimeZoneId}, .TradingHours: {contract.TradingHours}, .UnderConId: {contract.UnderConId}, .UnderSecType: {contract.UnderSecType}, " +
-                $".UnderSymbol: {contract.UnderSymbol}, .ValidExchanges: {contract.ValidExchanges}");
+            Log.Trace($"InteractiveBrokersClient.bondContractDetails() reqId: {reqId}, ContractDetails: {JsonConvert.SerializeObject(contract)}");
             OnBondContractDetails(new ContractDetailsEventArgs(reqId, contract));
         }
 
@@ -686,17 +679,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         {
             Log.Trace($"InteractiveBrokersClient.updatePortfolio() position: {position}, marketPrice: {marketPrice}, marketValue: {marketValue}, " +
                 $"averageCost: {averageCost}, unrealisedPnl: {unrealisedPnl}, realisedPnl: {realisedPnl}, accountName: {accountName}");
-            Log.Trace($"InteractiveBrokersBrokerage.GetExecutions(): Contract.ComboLegsDescription: {contract.ComboLegsDescription}, .ConId: {contract.ConId}, .Currency: {contract.Currency}, " +
-                $".Exchange: {contract.Exchange}, .IncludeExpired: {contract.IncludeExpired}, .LastTradeDateOrContractMonth: {contract.LastTradeDateOrContractMonth}, " +
-                $".LocalSymbol: {contract.LocalSymbol}, .Multiplier: {contract.Multiplier}, .PrimaryExch: {contract.PrimaryExch}, .Right: {contract.Right}, .SecId: {contract.SecId}, " +
-                $".SecIdType: {contract.SecIdType}, .SecType: {contract.SecType}, .Strike: {contract.Strike}, .Symbol: {contract.Symbol}, .TradingClass: {contract.TradingClass}, " +
-                $".UnderComp: {contract.UnderComp}");
-            foreach (var cLeg in contract.ComboLegs)
-            {
-                Log.Trace($"InteractiveBrokersBrokerage.updatePortfolio() ComboLeg: Action:{cLeg.Action}, ConId: {cLeg.ConId}, DesignatedLocation: {cLeg.DesignatedLocation}, " +
-                    $"Exchange: {cLeg.Exchange}, ExemptCode: {cLeg.ExemptCode}, OpenClose: {cLeg.OpenClose}, Ratio: {cLeg.Ratio}, ShortSaleSlot: {cLeg.ShortSaleSlot}");
-            }
-
+            Log.Trace($"InteractiveBrokersBrokerage.GetExecutions(): Contract {JsonConvert.SerializeObject(contract)}");
             var positionValue = Convert.ToInt32(position);
             OnUpdatePortfolio(new UpdatePortfolioEventArgs(contract, positionValue, marketPrice, marketValue, averageCost, unrealisedPnl, realisedPnl,
                 accountName));
@@ -754,16 +737,10 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="orderState">The orderState attributes include margin and commissions fields for both pre and post trade data.</param>
         public void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
         {
-            //TODO: here was decided to use Json, was created another branch
-            Log.Trace($"InteractiveBrokersBrokerage.openOrder() orderId: {orderId}, order: .Account{order.Account}, .Action: {order.Action}, .ActiveStartTime: {order.ActiveStartTime}, " +
-                $".ActiveStopTime: {order.ActiveStopTime}, .AdjustableTrailingUnit: {order.AdjustableTrailingUnit}, .AdjustedOrderType: {order.AdjustedOrderType}, .AdjustedStopLimitPrice: {order.AdjustedStopLimitPrice}, " +
-                $".AdjustedStopPrice: {order.AdjustedStopPrice}, .AdjustedTrailingAmount: {order.AdjustedTrailingAmount}, .AlgoId: {order.AlgoId}, .AlgoParams: {order.AlgoParams}, .AlgoStrategy: {order.AlgoStrategy}, " +
-                $".AllOrNone: {order.AllOrNone}, .AuctionStrategy: {order.AuctionStrategy}, .AuxPrice: {order.AuxPrice}");
-            Log.Trace($"InteractiveBrokersBrokerage.openOrder(): Contract.ComboLegsDescription: {contract.ComboLegsDescription}, .ConId: {contract.ConId}, .Currency: {contract.Currency}, " +
-                $".Exchange: {contract.Exchange}, .IncludeExpired: {contract.IncludeExpired}, .LastTradeDateOrContractMonth: {contract.LastTradeDateOrContractMonth}, " +
-                $".LocalSymbol: {contract.LocalSymbol}, .Multiplier: {contract.Multiplier}, .PrimaryExch: {contract.PrimaryExch}, .Right: {contract.Right}, .SecId: {contract.SecId}, " +
-                $".SecIdType: {contract.SecIdType}, .SecType: {contract.SecType}, .Strike: {contract.Strike}, .Symbol: {contract.Symbol}, .TradingClass: {contract.TradingClass}, " +
-                $".UnderComp: {contract.UnderComp}");
+            Log.Trace($"InteractiveBrokersBrokerage.openOrder() orderId: {orderId}");
+            Log.Trace($"InteractiveBrokersBrokerage.openOrder(): contract: {JsonConvert.SerializeObject(contract)}");
+            Log.Trace($"InteractiveBrokersBrokerage.openOrder(): order: {JsonConvert.SerializeObject(order)}");
+            Log.Trace($"InteractiveBrokersBrokerage.openOrder(): orderState: {JsonConvert.SerializeObject(orderState)}");
 
             OnOpenOrder(new OpenOrderEventArgs(orderId, contract, order, orderState));
         }
@@ -783,6 +760,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="contractDetails">This structure contains a full description of the contract being looked up.</param>
         public void contractDetails(int reqId, ContractDetails contractDetails)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.contractDetails() reqId: {reqId}, contractDetails: {JsonConvert.SerializeObject(contractDetails)}");
+
             OnContractDetails(new ContractDetailsEventArgs(reqId, contractDetails));
         }
 
@@ -792,6 +771,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="reqId">The Id of the data request.</param>
         public void contractDetailsEnd(int reqId)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.contractDetailsEnd() reqId: {reqId}");
             OnContractDetailsEnd(new RequestEndEventArgs(reqId));
         }
 
@@ -803,6 +783,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="execution">This structure contains addition order execution details.</param>
         public void execDetails(int reqId, Contract contract, Execution execution)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.execDetails() reqId: {reqId}, contract: {JsonConvert.SerializeObject(contract)}, execution: {JsonConvert.SerializeObject(execution)}");
             OnExecutionDetails(new ExecutionDetailsEventArgs(reqId, contract, execution));
         }
 
@@ -812,6 +793,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="reqId">The request's identifier.</param>
         public void execDetailsEnd(int reqId)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.execDetailsEnd() reqId: {reqId}");
             OnExecutionDetailsEnd(new RequestEndEventArgs(reqId));
         }
 
@@ -821,6 +803,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="commissionReport">The structure that contains commission details.</param>
         public void commissionReport(CommissionReport commissionReport)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.commissionReport() commissionReport: {JsonConvert.SerializeObject(commissionReport)}");
             OnCommissionReport(new CommissionReportEventArgs(commissionReport));
         }
 
@@ -832,6 +815,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="data">One of these XML reports: Company overview,Financial summary,Financial ratios,Financial statements,Analyst estimates,Company calendar</param>
         public void fundamentalData(int reqId, string data)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.fundamentalData() reqId: {reqId}, data: {data}");
             OnFundamentalData(new FundamentalDataEventArgs(reqId, data));
         }
 
@@ -842,6 +826,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="bar">The bar data.</param>
         public void historicalData(int reqId, Bar bar)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.historicalData() reqId: {reqId}, bar: {JsonConvert.SerializeObject(bar)}");
             OnHistoricalData(new HistoricalDataEventArgs(reqId, bar));
         }
 
@@ -852,6 +837,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="bar">The bar data.</param>
         public void historicalDataUpdate(int reqId, Bar bar)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.historicalDataUpdate() reqId: {reqId}, bar: {JsonConvert.SerializeObject(bar)}");
             OnHistoricalDataUpdate(new HistoricalDataUpdateEventArgs(reqId, bar));
         }
 
@@ -863,6 +849,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="end"></param>
         public void historicalDataEnd(int reqId, string start, string end)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.historicalDataEnd() reqId: {reqId}, start: {start}, end: {end}");
             OnHistoricalDataEnd(new HistoricalDataEndEventArgs(reqId, start, end));
         }
 
@@ -875,6 +862,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="marketDataType">1 for real-time streaming market data or 2 for frozen market data.</param>
         public void marketDataType(int reqId, int marketDataType)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.marketDataType() reqId: {reqId}, marketDataType: {marketDataType}");
             OnMarketDataType(new MarketDataTypeEventArgs(reqId, marketDataType));
         }
 
@@ -889,6 +877,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="size">The order size.</param>
         public void updateMktDepth(int tickerId, int position, int operation, int side, double price, int size)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.updateMktDepth() tickerId: {tickerId}, position: {position}, operation: {operation}, side: {side}, price: {price}, size: {size}");
             OnUpdateMarketDepth(new UpdateMarketDepthEventArgs(tickerId, position, operation, side, price, size));
         }
 
@@ -904,6 +893,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="size">The order size.</param>
         public void updateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.updateMktDepthL2() tickerId: {tickerId}, position: {position}, operation: {operation}, side: {side}, price: {price}, size: {size}");
             OnUpdateMarketDepthLevel2(new UpdateMarketDepthLevel2EventArgs(tickerId, position, marketMaker, operation, side, price, size));
         }
 
@@ -916,6 +906,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="origExchange">The exchange from which this message originated.</param>
         public void updateNewsBulletin(int msgId, int msgType, string message, string origExchange)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.updateNewsBulletin() msgId: {msgId}, msgType: {msgType}, message: {message}, origExchange: {origExchange}");
             OnUpdateNewsBulletin(new UpdateNewsBulletinEventArgs(msgId, msgType, message, origExchange));
         }
 
@@ -928,6 +919,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers.Client
         /// <param name="avgCost">The average cost of the position.</param>
         public void position(string account, Contract contract, double pos, double avgCost)
         {
+            Log.Trace($"InteractiveBrokersBrokerage.position() account: {account}, contract: {JsonConvert.SerializeObject(contract)}, pos: {pos}, avgCost: {avgCost}");
             var positionValue = Convert.ToInt32(pos);
             OnPosition(new PositionEventArgs(account, contract, positionValue, avgCost));
         }

@@ -37,6 +37,7 @@ using IBApi;
 using NodaTime;
 using Bar = QuantConnect.Data.Market.Bar;
 using HistoryRequest = QuantConnect.Data.HistoryRequest;
+using Newtonsoft.Json;
 
 namespace QuantConnect.Brokerages.InteractiveBrokers
 {
@@ -298,10 +299,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             try
             {
                 Log.Trace("InteractiveBrokersBrokerage.PlaceOrder(): Symbol: " + order.Symbol.Value + " Quantity: " + order.Quantity);
-                Log.Trace($"InteractiveBrokersBrokerage.PlaceOrder() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
-                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
-                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
-                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
+                Log.Trace($"InteractiveBrokersBrokerage.PlaceOrder() order: {JsonConvert.SerializeObject(order)}");
                 IBPlaceOrder(order, true);
                 return true;
             }
@@ -322,10 +320,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             try
             {
                 Log.Trace("InteractiveBrokersBrokerage.UpdateOrder(): Symbol: " + order.Symbol.Value + " Quantity: " + order.Quantity + " Status: " + order.Status);
-                Log.Trace($"InteractiveBrokersBrokerage.UpdateOrder() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
-                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
-                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
-                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
+                Log.Trace($"InteractiveBrokersBrokerage.UpdateOrder() order: {JsonConvert.SerializeObject(order)}");
                 IBPlaceOrder(order, true);
 
                 IBPlaceOrder(order, false);
@@ -348,10 +343,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             try
             {
                 Log.Trace("InteractiveBrokersBrokerage.CancelOrder(): Symbol: " + order.Symbol.Value + " Quantity: " + order.Quantity);
-                Log.Trace($"InteractiveBrokersBrokerage.CancelOrder() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
-                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
-                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
-                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
+                Log.Trace($"InteractiveBrokersBrokerage.CancelOrder(): order: {JsonConvert.SerializeObject(order)}");
                 IBPlaceOrder(order, true);
                 // this could be better
                 foreach (var id in order.BrokerId)
@@ -414,10 +406,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             foreach (var order in orders)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetOpenOrders() Id: {order.Id}, BrokerId: {order.BrokerId}, ContingentId: {order.ContingentId}, " +
-                    $"Direction: {order.Direction}, Duration: {order.Duration}, Price: {order.Price}, PriceCurrency: {order.PriceCurrency}, Properties: {order.Properties.ToString()}, " +
-                    $"Quantity: {order.Quantity}, AbsoluteQuantity: {order.AbsoluteQuantity}, SecurityType: {order.SecurityType.ToString()}, Status: {order.Status}, Symbol: {order.Symbol.Value}, " +
-                    $"Tag: {order.Tag}, Time: {order.Time}, Type: {order.Type.ToString()}, Value: {order.Value}");
+                Log.Trace($"InteractiveBrokersBrokerage.GetOpenOrders() order: {JsonConvert.SerializeObject(order)}");
             }
 
             return orders;
@@ -467,11 +456,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             foreach (var holding in holdings)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetAccountHoldings() AveragePrice: {holding.AveragePrice}, ConversionRate: {holding.ConversionRate}, CurrencySymbol: {holding.CurrencySymbol}, " +
-                    $"MarketPrice: {holding.MarketPrice}, MarketValue: {holding.MarketValue}, Quantity: {holding.Quantity}, Symbol: {holding.Symbol.Value}, Type: {holding.Type.ToString()}, " +
-                    $"UnrealizedPnL: {holding.UnrealizedPnL}");
+                Log.Trace($"InteractiveBrokersBrokerage.GetAccountHoldings() holding: {JsonConvert.SerializeObject(holding)}");
             }
-
             return holdings;
         }
 
@@ -514,9 +500,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             foreach (var holding in holdings)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetAllAccountHoldings() AveragePrice: {holding.AveragePrice}, ConversionRate: {holding.ConversionRate}, CurrencySymbol: {holding.CurrencySymbol}, " +
-                    $"MarketPrice: {holding.MarketPrice}, MarketValue: {holding.MarketValue}, Quantity: {holding.Quantity}, Symbol: {holding.Symbol.Value}, Type: {holding.Type.ToString()}, " +
-                    $"UnrealizedPnL: {holding.UnrealizedPnL}");
+                Log.Trace($"InteractiveBrokersBrokerage.GetAllAccountHoldings() holding: {JsonConvert.SerializeObject(holding)}");
             }
 
             return holdings;
@@ -575,7 +559,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             foreach (KeyValuePair<string, string> accSum in result)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetAccountSummary() Tag: {accSum.Key}, Value: {accSum.Value}");
+                Log.Trace($"InteractiveBrokersBrokerage.GetAccountSummary() TagValue: {JsonConvert.SerializeObject(accSum)}");
             }
 
             return result;
@@ -599,8 +583,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             foreach (var cash in result)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetCashBalance(): Amount: {cash.Amount}, ConversionRate: {cash.ConversionRate}, SecuritySymbol: {cash.SecuritySymbol.Value}, " +
-                    $"Symbol: {cash.Symbol}, ValueInAccountCurrency: {cash.ValueInAccountCurrency}");
+                Log.Trace($"InteractiveBrokersBrokerage.GetCashBalance() cash: {JsonConvert.SerializeObject(cash)}");
             }
 
             return _accountData.CashBalances.Select(x => new Cash(x.Key, x.Value, GetUsdConversion(x.Key))).ToList();
@@ -675,20 +658,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             foreach (var ex in details)
             {
-                Log.Trace($"InteractiveBrokersBrokerage.GetExecutions(): RequestId: {ex.RequestId}, Execution AcctNumber: {ex.Execution.AcctNumber}, AvgPrice: {ex.Execution.AvgPrice}, " +
-                    $"ClientId: {ex.Execution.ClientId}, CumQty: {ex.Execution.CumQty}, EvMultiplier: {ex.Execution.EvMultiplier}, EvRule: {ex.Execution.EvRule}, Exchange: {ex.Execution.Exchange}, " +
-                    $"ExecId: {ex.Execution.ExecId}, Liquidation: {ex.Execution.Liquidation}, ModelCode: {ex.Execution.ModelCode}, OrderId: {ex.Execution.OrderId}, OrderRef: {ex.Execution.OrderRef}, " +
-                    $"PermId: {ex.Execution.PermId}, Price: {ex.Execution.Price}, Shares: {ex.Execution.Shares}, Side: {ex.Execution.Side}, Time: {ex.Execution.Time}");
-                Log.Trace($"InteractiveBrokersBrokerage.GetExecutions(): Contract.ComboLegsDescription: {ex.Contract.ComboLegsDescription}, .ConId: {ex.Contract.ConId}, .Currency: {ex.Contract.Currency}, " +
-                    $".Exchange: {ex.Contract.Exchange}, .IncludeExpired: {ex.Contract.IncludeExpired}, .LastTradeDateOrContractMonth: {ex.Contract.LastTradeDateOrContractMonth}, " +
-                    $".LocalSymbol: {ex.Contract.LocalSymbol}, .Multiplier: {ex.Contract.Multiplier}, .PrimaryExch: {ex.Contract.PrimaryExch}, .Right: {ex.Contract.Right}, .SecId: {ex.Contract.SecId}, " +
-                    $".SecIdType: {ex.Contract.SecIdType}, .SecType: {ex.Contract.SecType}, .Strike: {ex.Contract.Strike}, .Symbol: {ex.Contract.Symbol}, .TradingClass: {ex.Contract.TradingClass}, " +
-                    $".UnderComp: {ex.Contract.UnderComp}");
-                foreach (var cLeg in ex.Contract.ComboLegs)
-                {
-                    Log.Trace($"InteractiveBrokersBrokerage.GetExecutions() ComboLeg: Action:{cLeg.Action}, ConId: {cLeg.ConId}, DesignatedLocation: {cLeg.DesignatedLocation}, " +
-                        $"Exchange: {cLeg.Exchange}, ExemptCode: {cLeg.ExemptCode}, OpenClose: {cLeg.OpenClose}, Ratio: {cLeg.Ratio}, ShortSaleSlot: {cLeg.ShortSaleSlot}");
-                }
+                Log.Trace($"InteractiveBrokersBrokerage.GetExecutions(): ExecutionDetailsEventArgs: {JsonConvert.SerializeObject(ex)}");
             }
 
             return details;
