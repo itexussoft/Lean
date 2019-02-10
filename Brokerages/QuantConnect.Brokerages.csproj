@@ -190,6 +190,7 @@
     <Compile Include="GDAX\GDAXBrokerage.Messaging.cs" />
     <Compile Include="GDAX\OrderBook.cs" />
     <Compile Include="InteractiveBrokers\AbstractInteractiveBrokersBrokerage.cs" />
+    <Compile Include="InteractiveBrokers\AlgorithmTimeRules.cs" />
     <Compile Include="InteractiveBrokers\Client\IBrokerageClient.cs" />
     <Compile Include="IWebSocket.cs" />
     <Compile Include="GDAX\Messages.cs" />
