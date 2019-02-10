@@ -108,5 +108,10 @@
         {
             get; set;
         }
+
+        public TimeRulesApi TimeRulesApi
+        {
+            get; set;
+        }
     }
 }
