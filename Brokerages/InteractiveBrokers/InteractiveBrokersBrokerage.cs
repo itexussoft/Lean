@@ -1387,6 +1387,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             OnMessage(BrokerageMessageEvent.Reconnected(string.Empty));
         }
 
+        public override AlgorithmTimeRules GetTimeRules()
+        {
+            //for this implementation this method has to return null
+            return null;
+        }
+
         /// <summary>
         /// Restores data subscriptions existing before the IB Gateway restart
         /// </summary>
