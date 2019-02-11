@@ -4,12 +4,17 @@
 
     public class AlgorithmTimeRules
     {
-        public TimeSpan OpenHandlerTime
+        public TimeSpan AlgorithmStartTime
         {
             get; set;
         }
 
         public TimeSpan TradeStartTime
+        {
+            get; set;
+        }
+
+        public TimeSpan OpenHandlerTime
         {
             get; set;
         }

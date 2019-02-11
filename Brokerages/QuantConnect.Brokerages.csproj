@@ -192,6 +192,7 @@
     <Compile Include="InteractiveBrokers\AbstractInteractiveBrokersBrokerage.cs" />
     <Compile Include="InteractiveBrokers\AlgorithmTimeRules.cs" />
     <Compile Include="InteractiveBrokers\Client\IBrokerageClient.cs" />
+    <Compile Include="InteractiveBrokers\TimeRulesApi.cs" />
     <Compile Include="IWebSocket.cs" />
     <Compile Include="GDAX\Messages.cs" />
     <Compile Include="WebSocketError.cs" />
