@@ -2,7 +2,7 @@
 {
     using System;
 
-    class TimeRulesApi
+    public class TimeRulesApi
     {
         public TimeSpan BeforePreOpen
         {
