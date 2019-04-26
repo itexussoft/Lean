@@ -54,7 +54,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 #if DEBUG
         private static int _nextClientId = 5;
 #else
-            private static int _nextClientId;
+        private static int _nextClientId;
 #endif
 
         // next valid request id for queries
@@ -2929,6 +2929,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private readonly ConcurrentDictionary<Symbol, int> _lastAskSizes = new ConcurrentDictionary<Symbol, int>();
         private readonly ConcurrentDictionary<Symbol, int> _openInterests = new ConcurrentDictionary<Symbol, int>();
         private readonly List<Tick> _ticks = new List<Tick>();
+
+        public List<Symbol> SubscribedSymbols => _subscribedSymbols.Select(x => x.Key).ToList();
 
         private static class AccountValueKeys
         {
