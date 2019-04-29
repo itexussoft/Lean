@@ -51,7 +51,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Queues
         /// </summary>
         /// <param name="job">Job we're subscribing for:</param>
         /// <param name="symbols">The symbols to be added keyed by SecurityType</param>
-        public virtual void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols)
+        public virtual void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false)
         {
             _api.LiveSubscribe(symbols);
         }

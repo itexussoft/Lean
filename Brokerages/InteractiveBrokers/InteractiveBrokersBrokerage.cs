@@ -2310,7 +2310,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         /// <param name="job">Job we're subscribing for:</param>
         /// <param name="symbols">The symbols to be added keyed by SecurityType</param>
-        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols)
+        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false)
         {
             try
             {
@@ -2350,8 +2350,15 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                                 // track subscription time for minimum delay in unsubscribe
                                 _subscriptionTimes[id] = DateTime.UtcNow;
 
-                                // we would like to receive OI (101)
-                                Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                if (genericSubscription)
+                                {
+                                    Client.ClientSocket.reqMktData(id, contract, "101,236", false, false, new List<TagValue>());
+                                }
+                                else
+                                {
+                                    // we would like to receive OI (101)
+                                    Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                }
 
                                 _subscribedSymbols[symbol] = id;
                                 _subscribedTickets[id] = subscribeSymbol;
