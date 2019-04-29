@@ -1288,6 +1288,15 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 brokerageMessageType = BrokerageMessageType.Warning;
             }
 
+            if(errorCode == 404)
+            {
+                var order = _orderProvider.GetOrderByBrokerageId(requestId);
+                if (order != null)
+                {
+                    CancelOrder(order);
+                }
+            }
+
             // code 1100 is a connection failure, we'll wait a minute before exploding gracefully
             if (errorCode == 1100)
             {
