@@ -1288,12 +1288,25 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 brokerageMessageType = BrokerageMessageType.Warning;
             }
 
-            if(errorCode == 404)
+            if (errorCode == 404)
             {
                 var order = _orderProvider.GetOrderByBrokerageId(requestId);
                 if (order != null)
                 {
                     CancelOrder(order);
+                }
+            }
+
+            if (errorCode == 100)
+            {
+                Log.Trace("ERROR 100 - Max rate of messages per second has been exceeded.");
+                try
+                {
+                    this.Connect();
+                }
+                catch(Exception reconnectException)
+                {
+                    Log.Trace($"Recconnect error: {reconnectException.StackTrace}, {reconnectException.Message}");
                 }
             }
 
