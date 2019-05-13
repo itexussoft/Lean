@@ -1304,7 +1304,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 {
                     this.Connect();
                 }
-                catch(Exception reconnectException)
+                catch (Exception reconnectException)
                 {
                     Log.Trace($"Recconnect error: {reconnectException.StackTrace}, {reconnectException.Message}");
                 }
@@ -2374,7 +2374,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
                                 if (genericSubscription)
                                 {
-                                    Client.ClientSocket.reqMktData(id, contract, "101,236", false, false, new List<TagValue>());
+                                    Client.ClientSocket.reqMktData(id, contract, "236", false, false, new List<TagValue>());
                                 }
                                 else
                                 {
