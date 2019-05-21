@@ -38,7 +38,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Queues
         /// <summary>
         /// Desktop/Local doesn't support live data from this handler
         /// </summary>
-        public virtual void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false)
+        public virtual void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false, bool volumeSubscription = false)
         {
             throw new NotImplementedException("QuantConnect.Queues.LiveDataQueue has not implemented live data.");
         }

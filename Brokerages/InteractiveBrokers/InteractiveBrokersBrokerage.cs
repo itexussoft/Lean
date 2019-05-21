@@ -72,6 +72,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private readonly IB.InteractiveBrokersClient _client;
         private readonly string _agentDescription;
 
+        private string ibGateWaySelfHostUrl;
+        private int ibGatewaPorty;
+
+        Func<string, int, bool> IbGatewayIsRunning;
+        Func<string, int, bool> IbGatewayStart;
+        Func<string, int, bool> IbGatewayStop;
+
         private Thread _messageProcessingThread;
         private readonly AutoResetEvent _resetEventRestartGateway = new AutoResetEvent(false);
         private readonly CancellationTokenSource _ctsRestartGateway = new CancellationTokenSource();
@@ -1275,7 +1282,17 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 errorMsg += ". Origin: " + requestMessage;
             }
 
-            Log.Trace($"InteractiveBrokersBrokerage.HandleError(): RequestId: {requestId} ErrorCode: {errorCode} - {errorMsg}");
+            //Log.Trace($"InteractiveBrokersBrokerage.HandleError(): RequestId: {requestId} ErrorCode: {errorCode} - {errorMsg}");
+            //if (errorMsg.Contains("System.IO.IOException: Unable to read data from the transport connection: An existing connection was forcibly closed by the remote host."))
+            //{
+            //    var isGatewayRunning = InteractiveBrokersGatewayRunner.IsRunning();
+            //    WTP.
+            //    Log.Trace($"GATEWAY STATUS: {")
+                    
+            //    InteractiveBrokersGatewayRunner
+            //    CheckIbGateway()
+            //    this.Connect();
+            //}
 
             // figure out the message type based on our code collections below
             var brokerageMessageType = BrokerageMessageType.Information;
@@ -1313,14 +1330,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             // code 1100 is a connection failure, we'll wait a minute before exploding gracefully
             if (errorCode == 1100)
             {
-                if (this.estNow != null && this.isGatewayClosableTime != null && this.OnConnectionLost != null)
-                {
-                    if (this.isGatewayClosableTime(this.estNow().TimeOfDay))
-                    {
-                        this.OnConnectionLost?.Invoke(this, this._account);
-                        return;
-                    }
-                }
+                //if (this.estNow != null && this.isGatewayClosableTime != null && this.OnConnectionLost != null)
+                //{
+                //    if (this.isGatewayClosableTime(this.estNow().TimeOfDay))
+                //    {
+                //        this.OnConnectionLost?.Invoke(this, this._account);
+                //        return;
+                //    }
+                //}
 
                 if (!_disconnected1100Fired)
                 {
@@ -2332,7 +2349,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         /// <param name="job">Job we're subscribing for:</param>
         /// <param name="symbols">The symbols to be added keyed by SecurityType</param>
-        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false)
+        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false, bool volumeSubscription = false)
         {
             try
             {
@@ -2378,8 +2395,15 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                                 }
                                 else
                                 {
-                                    // we would like to receive OI (101)
-                                    Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                    if (volumeSubscription)
+                                    {
+                                        Client.ClientSocket.reqMktData(id, contract, "165", false, false, new List<TagValue>());
+                                    }
+                                    else
+                                    {
+                                        // we would like to receive OI (101)
+                                        Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                    }
                                 }
 
                                 _subscribedSymbols[symbol] = id;

@@ -98,6 +98,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
             catch (Exception err)
             {
+                Log.Trace($"FATAL::: {err.Message}");
                 Log.Error(err);
             }
         }

@@ -336,7 +336,7 @@ namespace QuantConnect.Brokerages.Oanda
         /// </summary>
         /// <param name="job">Job we're subscribing for:</param>
         /// <param name="symbols">The symbols to be added keyed by SecurityType</param>
-        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false)
+        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false, bool volumeSubscription = false)
         {
             lock (LockerSubscriptions)
             {

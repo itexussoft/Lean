@@ -92,7 +92,7 @@ namespace QuantConnect.Brokerages.Tradier
         /// </summary>
         /// <param name="job">Live job to subscribe with</param>
         /// <param name="symbols">List of symbols to subscribe to</param>
-        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false)
+        public void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false, bool volumeSubscription = false)
         {
             //Add the symbols to the list if they aren't there already.
             foreach (var symbol in symbols.Where(x => !x.Value.Contains("-UNIVERSE-")))

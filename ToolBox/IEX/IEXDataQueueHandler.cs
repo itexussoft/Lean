@@ -160,7 +160,7 @@ namespace QuantConnect.ToolBox.IEX
         /// <summary>
         /// Subscribe to symbols
         /// </summary>
-        public sealed override void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false)
+        public sealed override void Subscribe(LiveNodePacket job, IEnumerable<Symbol> symbols, bool genericSubscription = false, bool volumeSubscription = false)
         {
             try
             {
