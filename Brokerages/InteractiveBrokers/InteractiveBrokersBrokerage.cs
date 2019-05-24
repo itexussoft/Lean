@@ -2870,6 +2870,16 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                         {
                             dataDownloaded.Set();
                         }
+
+                        try
+                        {
+                            Log.Trace($"cancelHistoricalData: {historicalTicker}");
+                            Client.ClientSocket.cancelHistoricalData(historicalTicker);
+                        }
+                        catch(Exception cancelHistoricalDataError)
+                        {
+                            Log.Trace($"cancelHistoricalData: error: {cancelHistoricalDataError.StackTrace}, {cancelHistoricalDataError.Message}");
+                        }
                     }
                 };
 
@@ -2892,6 +2902,16 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
                 if (waitResult == WaitHandle.WaitTimeout)
                 {
+                    try
+                    {
+                        Log.Trace($"cancelHistoricalData on Timeout: {historicalTicker}");
+                        Client.ClientSocket.cancelHistoricalData(historicalTicker);
+                    }
+                    catch (Exception cancelHistoricalDataError)
+                    {
+                        Log.Trace($"cancelHistoricalData on Timeout: error: {cancelHistoricalDataError.StackTrace}, {cancelHistoricalDataError.Message}");
+                    }
+
                     if (pacing)
                     {
                         // we received 'pacing violation' error from IB. So we had to wait
