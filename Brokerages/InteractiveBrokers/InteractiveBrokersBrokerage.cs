@@ -1288,7 +1288,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             //    var isGatewayRunning = InteractiveBrokersGatewayRunner.IsRunning();
             //    WTP.
             //    Log.Trace($"GATEWAY STATUS: {")
-                    
+
             //    InteractiveBrokersGatewayRunner
             //    CheckIbGateway()
             //    this.Connect();
@@ -1317,14 +1317,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             if (errorCode == 100)
             {
                 Log.Trace("ERROR 100 - Max rate of messages per second has been exceeded.");
-                try
-                {
-                    this.Connect();
-                }
-                catch (Exception reconnectException)
-                {
-                    Log.Trace($"Recconnect error: {reconnectException.StackTrace}, {reconnectException.Message}");
-                }
+                Log.Trace(errorMsg);
             }
 
             // code 1100 is a connection failure, we'll wait a minute before exploding gracefully
@@ -2465,7 +2458,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                                 Client.ClientSocket.cancelMktData(id);
 
                                 Symbol s;
-                                _subscribedTickets.TryRemove(id, out s);
                             }
                         }
                     }
@@ -2876,7 +2868,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                             Log.Trace($"cancelHistoricalData: {historicalTicker}");
                             Client.ClientSocket.cancelHistoricalData(historicalTicker);
                         }
-                        catch(Exception cancelHistoricalDataError)
+                        catch (Exception cancelHistoricalDataError)
                         {
                             Log.Trace($"cancelHistoricalData: error: {cancelHistoricalDataError.StackTrace}, {cancelHistoricalDataError.Message}");
                         }
