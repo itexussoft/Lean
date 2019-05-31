@@ -2863,15 +2863,15 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                             dataDownloaded.Set();
                         }
 
-                        try
-                        {
-                            Log.Trace($"cancelHistoricalData: {historicalTicker}");
-                            Client.ClientSocket.cancelHistoricalData(historicalTicker);
-                        }
-                        catch (Exception cancelHistoricalDataError)
-                        {
-                            Log.Trace($"cancelHistoricalData: error: {cancelHistoricalDataError.StackTrace}, {cancelHistoricalDataError.Message}");
-                        }
+                        //try
+                        //{
+                        //    Log.Trace($"cancelHistoricalData: {historicalTicker}");
+                        //    Client.ClientSocket.cancelHistoricalData(historicalTicker);
+                        //}
+                        //catch (Exception cancelHistoricalDataError)
+                        //{
+                        //    Log.Trace($"cancelHistoricalData: error: {cancelHistoricalDataError.StackTrace}, {cancelHistoricalDataError.Message}");
+                        //}
                     }
                 };
 
