@@ -66,7 +66,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// <param name="password">The log in password</param>
         /// <param name="tradingMode">Live or Paper trading modes</param>
         /// <param name="useTws">True to use Trader Work Station, false to just launch the API gateway</param>
-        public static void Start(string ibControllerDirectory, string twsDirectory, string userId, string password, string tradingMode, bool useTws = false)
+        public static void Start(string ibControllerDirectory, string twsDirectory, string userId, string password, string tradingMode, bool useTws = false, int waiting = 30)
         {
             _ibControllerDirectory = ibControllerDirectory;
             _twsDirectory = twsDirectory;
@@ -94,7 +94,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 _scriptProcessId = process != null ? process.Id : 0;
 
                 // wait a few seconds for IB to start up
-                Thread.Sleep(TimeSpan.FromSeconds(30));
+                Thread.Sleep(TimeSpan.FromSeconds(waiting));
             }
             catch (Exception err)
             {
