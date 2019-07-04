@@ -1542,6 +1542,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     return;
                 }
 
+                Log.Trace($"HandleOrderStatusUpdates: ORDER: id: {order.Id}, symbols: {order.Symbol?.Value}, price: {order.Price}, quantity: {order.Quantity}");
+
                 // IB likes to duplicate/triplicate some events, so we fire non-fill events only if status changed
                 if (status != order.Status)
                 {
