@@ -2384,20 +2384,27 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                                 // track subscription time for minimum delay in unsubscribe
                                 _subscriptionTimes[id] = DateTime.UtcNow;
 
-                                if (genericSubscription)
+                                if (genericSubscription && volumeSubscription)
                                 {
-                                    Client.ClientSocket.reqMktData(id, contract, "236", false, false, new List<TagValue>());
+                                    Client.ClientSocket.reqMktData(id, contract, "165,236", false, false, new List<TagValue>());
                                 }
                                 else
                                 {
-                                    if (volumeSubscription)
+                                    if (genericSubscription)
                                     {
-                                        Client.ClientSocket.reqMktData(id, contract, "165", false, false, new List<TagValue>());
+                                        Client.ClientSocket.reqMktData(id, contract, "236", false, false, new List<TagValue>());
                                     }
                                     else
                                     {
-                                        // we would like to receive OI (101)
-                                        Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                        if (volumeSubscription)
+                                        {
+                                            Client.ClientSocket.reqMktData(id, contract, "165", false, false, new List<TagValue>());
+                                        }
+                                        else
+                                        {
+                                            // we would like to receive OI (101)
+                                            Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                        }
                                     }
                                 }
 
