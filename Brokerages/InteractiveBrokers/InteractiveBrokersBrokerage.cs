@@ -47,6 +47,10 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     {
         public event EventHandler<string> OnConnectionLost;
 
+        public event EventHandler<bool> OnConnectionStatusChanged;
+
+        public bool IsLive { get; set; }
+
         // next valid order id for this client
         private int _nextValidId;
         // next valid client id for the gateway/tws
@@ -637,7 +641,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             _accountData.Clear();
 
             var attempt = 1;
-            const int maxAttempts = 5;
+            const int maxAttempts = 6;
             var existingSessionDetected = false;
             while (true)
             {
@@ -658,6 +662,10 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     _messageProcessingThread = new Thread(() =>
                     {
                         Log.Trace("IB message processing thread started: #" + Thread.CurrentThread.ManagedThreadId);
+                        if (IsLive)
+                        {
+                            OnConnectionStatusChanged?.Invoke(this, true);
+                        }
 
                         while (_client.ClientSocket.IsConnected())
                         {
@@ -680,7 +688,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     _messageProcessingThread.Start();
 
                     // pause for a moment to receive next valid ID message from gateway
-                    if (!_waitForNextValidId.WaitOne(15000))
+                    var pause = attempt < 4 ? 15000 : attempt < 6 ? 20000 : 30000;
+                    if (!_waitForNextValidId.WaitOne(pause))
                     {
                         Log.Trace("InteractiveBrokersBrokerage.Connect(): Operation took longer than 15 seconds.");
 
@@ -694,7 +703,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                             throw new Exception("InteractiveBrokersBrokerage.Connect(): An existing session was detected and will not be automatically disconnected. Please close the existing session manually.");
                         }
 
-                        // max out at 5 attempts to connect ~1 minute
+                        // max out at 6 attempts to connect ~1 minute
                         if (attempt++ < maxAttempts)
                         {
                             Thread.Sleep(1000);
@@ -859,6 +868,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         public override void Disconnect()
         {
+            Log.Trace($"InteractiveBrokersBrokerage.Disconnect(). IsLive: {IsLive}");
             _client.ClientSocket.eDisconnect();
 
             if (_messageProcessingThread != null)
@@ -866,6 +876,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 _signal.issueSignal();
                 _messageProcessingThread.Join();
                 _messageProcessingThread = null;
+            }
+
+            if (IsLive)
+            {
+                OnConnectionStatusChanged?.Invoke(this, false);
             }
         }
 
@@ -1267,6 +1282,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private void HandleError(object sender, IB.ErrorEventArgs e)
         {
             // https://www.interactivebrokers.com/en/software/api/apiguide/tables/api_message_codes.htm
+
+            if (IsLive)
+            {
+                if (e.Message.Contains("System.Net.Sockets.SocketException") || e.Message.Contains("System.IO.EndOfStreamException"))
+                {
+                    OnConnectionStatusChanged?.Invoke(this, false);
+                }
+            }
 
             var requestId = e.Id;
             var errorCode = e.Code;
