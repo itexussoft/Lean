@@ -49,6 +49,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
         public event EventHandler<bool> OnConnectionStatusChanged;
 
+        public event EventHandler<int> OnAttemptChanged;
+
         public bool IsLive { get; set; }
 
         // next valid order id for this client
@@ -648,6 +650,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 try
                 {
                     Log.Trace("InteractiveBrokersBrokerage.Connect(): Attempting to connect ({0}/{1}) ...", attempt, maxAttempts);
+                    OnAttemptChanged?.Invoke(this, attempt);
 
                     // if message processing thread is still running, wait until it terminates
                     Disconnect();
