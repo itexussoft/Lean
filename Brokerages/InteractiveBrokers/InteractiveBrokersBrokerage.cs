@@ -47,6 +47,12 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
     {
         public event EventHandler<string> OnConnectionLost;
 
+        public event EventHandler<bool> OnConnectionStatusChanged;
+
+        public event EventHandler<int> OnAttemptChanged;
+
+        public bool IsLive { get; set; }
+
         // next valid order id for this client
         private int _nextValidId;
         // next valid client id for the gateway/tws
@@ -637,13 +643,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             _accountData.Clear();
 
             var attempt = 1;
-            const int maxAttempts = 5;
+            const int maxAttempts = 6;
             var existingSessionDetected = false;
             while (true)
             {
                 try
                 {
                     Log.Trace("InteractiveBrokersBrokerage.Connect(): Attempting to connect ({0}/{1}) ...", attempt, maxAttempts);
+                    OnAttemptChanged?.Invoke(this, attempt);
 
                     // if message processing thread is still running, wait until it terminates
                     Disconnect();
@@ -658,6 +665,10 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     _messageProcessingThread = new Thread(() =>
                     {
                         Log.Trace("IB message processing thread started: #" + Thread.CurrentThread.ManagedThreadId);
+                        if (IsLive)
+                        {
+                            OnConnectionStatusChanged?.Invoke(this, true);
+                        }
 
                         while (_client.ClientSocket.IsConnected())
                         {
@@ -680,7 +691,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     _messageProcessingThread.Start();
 
                     // pause for a moment to receive next valid ID message from gateway
-                    if (!_waitForNextValidId.WaitOne(15000))
+                    var pause = attempt < 4 ? 15000 : attempt < 6 ? 20000 : 30000;
+                    if (!_waitForNextValidId.WaitOne(pause))
                     {
                         Log.Trace("InteractiveBrokersBrokerage.Connect(): Operation took longer than 15 seconds.");
 
@@ -694,7 +706,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                             throw new Exception("InteractiveBrokersBrokerage.Connect(): An existing session was detected and will not be automatically disconnected. Please close the existing session manually.");
                         }
 
-                        // max out at 5 attempts to connect ~1 minute
+                        // max out at 6 attempts to connect ~1 minute
                         if (attempt++ < maxAttempts)
                         {
                             Thread.Sleep(1000);
@@ -859,6 +871,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         /// </summary>
         public override void Disconnect()
         {
+            Log.Trace($"InteractiveBrokersBrokerage.Disconnect(). IsLive: {IsLive}");
             _client.ClientSocket.eDisconnect();
 
             if (_messageProcessingThread != null)
@@ -866,6 +879,11 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 _signal.issueSignal();
                 _messageProcessingThread.Join();
                 _messageProcessingThread = null;
+            }
+
+            if (IsLive)
+            {
+                OnConnectionStatusChanged?.Invoke(this, false);
             }
         }
 
@@ -1268,6 +1286,14 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             // https://www.interactivebrokers.com/en/software/api/apiguide/tables/api_message_codes.htm
 
+            if (IsLive)
+            {
+                if (e.Message.Contains("System.Net.Sockets.SocketException") || e.Message.Contains("System.IO.EndOfStreamException"))
+                {
+                    OnConnectionStatusChanged?.Invoke(this, false);
+                }
+            }
+
             var requestId = e.Id;
             var errorCode = e.Code;
             var errorMsg = e.Message;
@@ -1541,6 +1567,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     Log.Error("InteractiveBrokersBrokerage.HandleOrderStatusUpdates(): Unable to locate order with BrokerageID " + update.OrderId);
                     return;
                 }
+
+                Log.Trace($"HandleOrderStatusUpdates: ORDER: id: {order.Id}, symbols: {order.Symbol?.Value}, price: {order.Price}, quantity: {order.Quantity}");
 
                 // IB likes to duplicate/triplicate some events, so we fire non-fill events only if status changed
                 if (status != order.Status)
@@ -2382,20 +2410,27 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                                 // track subscription time for minimum delay in unsubscribe
                                 _subscriptionTimes[id] = DateTime.UtcNow;
 
-                                if (genericSubscription)
+                                if (genericSubscription && volumeSubscription)
                                 {
-                                    Client.ClientSocket.reqMktData(id, contract, "236", false, false, new List<TagValue>());
+                                    Client.ClientSocket.reqMktData(id, contract, "165,236", false, false, new List<TagValue>());
                                 }
                                 else
                                 {
-                                    if (volumeSubscription)
+                                    if (genericSubscription)
                                     {
-                                        Client.ClientSocket.reqMktData(id, contract, "165", false, false, new List<TagValue>());
+                                        Client.ClientSocket.reqMktData(id, contract, "236", false, false, new List<TagValue>());
                                     }
                                     else
                                     {
-                                        // we would like to receive OI (101)
-                                        Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                        if (volumeSubscription)
+                                        {
+                                            Client.ClientSocket.reqMktData(id, contract, "165", false, false, new List<TagValue>());
+                                        }
+                                        else
+                                        {
+                                            // we would like to receive OI (101)
+                                            Client.ClientSocket.reqMktData(id, contract, "101", false, false, new List<TagValue>());
+                                        }
                                     }
                                 }
 

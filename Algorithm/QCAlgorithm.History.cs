@@ -264,7 +264,7 @@ namespace QuantConnect.Algorithm
                 Error("Calling History<TradeBar> method on a Forex or CFD security will return an empty result. Please use the generic version with QuoteBar type parameter.");
             }
 
-            return History(new[] {symbol}, start, Time.RoundDown((resolution ?? security.Resolution).ToTimeSpan()), resolution).Get(symbol).Memoize();
+            return History(new[] { symbol }, start, Time.RoundDown((resolution ?? security.Resolution).ToTimeSpan()), resolution).Get(symbol).Memoize();
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace QuantConnect.Algorithm
                 Error("Calling History<TradeBar> method on a Forex or CFD security will return an empty result. Please use the generic version with QuoteBar type parameter.");
             }
 
-            return History(new[] {symbol}, span, resolution).Get(symbol).Memoize();
+            return History(new[] { symbol }, span, resolution).Get(symbol).Memoize();
         }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace QuantConnect.Algorithm
                 Error("Calling History<TradeBar> method on a Forex or CFD security will return an empty result. Please use the generic version with QuoteBar type parameter.");
             }
 
-            return History(new[] {symbol}, start, end, resolution).Get(symbol).Memoize();
+            return History(new[] { symbol }, start, end, resolution).Get(symbol).Memoize();
         }
 
         /// <summary>
@@ -423,7 +423,7 @@ namespace QuantConnect.Algorithm
         /// <returns>An enumerable of slice satisfying the specified history request</returns>
         public IEnumerable<Slice> History(HistoryRequest request)
         {
-            return History(new[] {request}).Memoize();
+            return History(new[] { request }).Memoize();
         }
 
         /// <summary>
@@ -453,7 +453,7 @@ namespace QuantConnect.Algorithm
             var resolution = (Resolution)Math.Max((int)Resolution.Minute, (int)security.Resolution);
 
             var startTime = GetStartTimeAlgoTzForSecurity(security, 1, resolution);
-            var endTime   = Time.RoundDown(resolution.ToTimeSpan());
+            var endTime = Time.RoundDown(resolution.ToTimeSpan());
 
             // request QuoteBar for Options and Futures
             var dataType = typeof(BaseData);
@@ -494,7 +494,63 @@ namespace QuantConnect.Algorithm
                 return history.First().Values.First();
             }
 
+            for (var i = 0; i < 3; i++)
+            {
+                //Try early close
+                request.StartTimeUtc = SetEarlyClose(request.StartTimeUtc.Date);
+                history = History(new List<HistoryRequest> { request }).ToList();
+                if (history.Any() && history.First().Values.Any())
+                {
+                    return history.First().Values.First();
+                }
+
+                //Try previous day close at
+                request.StartTimeUtc = AdjustStartDate(request.StartTimeUtc.Date);
+                request.StartTimeUtc = SetStandardClose(request.StartTimeUtc.Date);
+                history = History(new List<HistoryRequest> { request }).ToList();
+                if (history.Any() && history.First().Values.Any())
+                {
+                    return history.First().Values.First();
+                }
+            }
+
             return null;
+        }
+
+        private DateTime AdjustStartDate(DateTime date)
+        {
+            if (date.DayOfWeek == DayOfWeek.Monday)
+            {
+                return date.AddDays(-2);
+            }
+            else
+            {
+                return date.AddDays(-1);
+            }
+        }
+
+        private DateTime SetEarlyClose(DateTime dateTime)
+        {
+            //UTC TIME
+            return new DateTime(
+                dateTime.Year,
+                dateTime.Month,
+                dateTime.Day,
+                16,
+                59,
+                0);
+        }
+
+        public DateTime SetStandardClose(DateTime dateTime)
+        {
+            //UTC TIME
+            return new DateTime(
+                dateTime.Year,
+                dateTime.Month,
+                dateTime.Day,
+                19,
+                59,
+                0);
         }
 
         /// <summary>
@@ -516,7 +572,7 @@ namespace QuantConnect.Algorithm
         {
             var reqs = requests.ToList();
             // filter out future data to prevent look ahead bias
-            return ((IAlgorithm) this).HistoryProvider.GetHistory(reqs, timeZone);
+            return ((IAlgorithm)this).HistoryProvider.GetHistory(reqs, timeZone);
         }
 
         /// <summary>
@@ -590,8 +646,8 @@ namespace QuantConnect.Algorithm
         {
             // find all subscriptions matching the requested type with a higher resolution than requested
             return from sub in security.Subscriptions.OrderByDescending(s => s.Resolution)
-                where type.IsAssignableFrom(sub.Type)
-                select sub;
+                   where type.IsAssignableFrom(sub.Type)
+                   select sub;
         }
     }
 }
